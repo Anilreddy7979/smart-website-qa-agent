@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+psycopg[binary]
+pydantic
+python-dotenv
+playwright
+requests
+beautifulsoup4
