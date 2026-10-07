@@ -196,13 +196,22 @@ def get_scans():
             cursor.execute(
                 """
                 SELECT
-                    id,
-                    website_url,
-                    status_code,
-                    page_title,
-                    scan_time
-                FROM scans
-                ORDER BY id DESC
+                    s.id,
+                    s.website_url,
+                    s.status_code,
+                    s.page_title,
+                    s.scan_time,
+                    COUNT(i.id) AS issue_count
+                FROM scans s
+                LEFT JOIN issues i
+                    ON s.id = i.scan_id
+                GROUP BY
+                    s.id,
+                    s.website_url,
+                    s.status_code,
+                    s.page_title,
+                    s.scan_time
+                ORDER BY s.id DESC
                 """
             )
 
@@ -224,7 +233,8 @@ def get_scans():
                     "website_url": row[1],
                     "status_code": row[2],
                     "page_title": row[3],
-                    "scan_time": row[4]
+                    "scan_time": row[4],
+                    "issue_count": row[5]
                 }
             )
 

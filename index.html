@@ -1390,6 +1390,8 @@
 
                   <th>Status</th>
 
+                  <th>Issues</th>
+
                   <th>Page Title</th>
 
                   <th>Scan Time</th>
@@ -1701,19 +1703,12 @@
 
           if (!data.scans || !data.scans.length) {
             tbody.innerHTML = `
-
-                    <tr>
-
-                        <td
-                            colspan="5"
-                            class="empty"
-                        >
-                            No scans found.
-                        </td>
-
-                    </tr>
-
-                `;
+                <tr>
+                    <td colspan="6" class="empty">
+                        No scans found.
+                    </td>
+                </tr>
+            `;
 
             return;
           }
@@ -1726,35 +1721,35 @@
             const statusText =
               status >= 200 && status < 400 ? "Healthy" : String(status);
 
+            const issueCount = Number(scan.issue_count ?? 0);
+
             row.innerHTML = `
+                <td>
+                    #${scan.id}
+                </td>
 
-                        <td>
-                            #${scan.id}
-                        </td>
+                <td>
+                    ${escapeHtml(scan.website_url)}
+                </td>
 
-                        <td>
-                            ${escapeHtml(scan.website_url)}
-                        </td>
+                <td>
+                    <span class="table-status">
+                        ${statusText}
+                    </span>
+                </td>
 
-                        <td>
+                <td>
+                    ${issueCount}
+                </td>
 
-                            <span
-                                class="table-status"
-                            >
-                                ${statusText}
-                            </span>
+                <td>
+                    ${escapeHtml(scan.page_title || "-")}
+                </td>
 
-                        </td>
-
-                        <td>
-                            ${escapeHtml(scan.page_title || "-")}
-                        </td>
-
-                        <td>
-                            ${formatDate(scan.scan_time)}
-                        </td>
-
-                    `;
+                <td>
+                    ${formatDate(scan.scan_time)}
+                </td>
+            `;
 
             tbody.appendChild(row);
           });
@@ -1762,19 +1757,15 @@
           console.error("HISTORY ERROR:", error);
 
           document.getElementById("historyTableBody").innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="5"
-                        class="empty"
-                    >
-                        Failed to load scan history.
-                    </td>
-
-                </tr>
-
-            `;
+            <tr>
+                <td
+                    colspan="6"
+                    class="empty"
+                >
+                    Failed to load scan history.
+                </td>
+            </tr>
+        `;
         }
       }
 
