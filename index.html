@@ -1438,13 +1438,9 @@
 
       function calculateScore(brokenLinks, brokenImages, jsErrors) {
         let score = 100;
-
         score -= brokenLinks * 10;
-
         score -= brokenImages * 5;
-
         score -= jsErrors * 10;
-
         return Math.max(0, Math.min(100, score));
       }
 
@@ -1465,21 +1461,27 @@
           title.textContent = "Excellent health";
 
           description.textContent =
-            "Your website passed the major quality checks.";
-        } else if (score >= 70) {
-          title.textContent = "Good health";
+            "Your website passed almost all major quality checks.";
+        } else if (score >= 75) {
+          title.textContent = "Very good health";
 
           description.textContent =
-            "A few issues were detected and may need attention.";
-        } else if (score >= 40) {
+            "Your website is in good shape with only minor issues.";
+        } else if (score >= 50) {
           title.textContent = "Needs attention";
 
-          description.textContent = "Several quality issues were detected.";
-        } else {
+          description.textContent =
+            "Some website issues were detected and should be reviewed.";
+        } else if (score >= 25) {
           title.textContent = "Poor health";
 
           description.textContent =
-            "Significant website issues require attention.";
+            "Several website issues were detected and need attention.";
+        } else {
+          title.textContent = "Critical health";
+
+          description.textContent =
+            "Major website issues were detected and require immediate attention.";
         }
       }
 
