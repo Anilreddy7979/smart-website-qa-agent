@@ -1436,12 +1436,7 @@
         statusMessage.className = type;
       }
 
-      function calculateScore(
-        brokenLinks,
-        brokenImages,
-        jsErrors,
-        totalIssues,
-      ) {
+      function calculateScore(brokenLinks, brokenImages, jsErrors) {
         let score = 100;
 
         score -= brokenLinks * 10;
@@ -1449,8 +1444,6 @@
         score -= brokenImages * 5;
 
         score -= jsErrors * 10;
-
-        score -= totalIssues * 3;
 
         return Math.max(0, Math.min(100, score));
       }
@@ -1541,7 +1534,6 @@
           links.broken ?? 0,
           images.broken ?? 0,
           jsErrorCount,
-          issues.length,
         );
 
         updateScore(score);
