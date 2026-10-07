@@ -2,1802 +2,1186 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>QA Sentinel | Smart Website QA</title>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <style>
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
-
       :root {
-        --bg: #070b14;
-        --panel: #0d1320;
-        --panel-light: #111a2b;
-        --border: rgba(148, 163, 184, 0.12);
-
-        --text: #f8fafc;
-        --muted: #8b98ad;
-
+        --bg: #080c14;
+        --panel: #0f1622;
+        --panel2: #141d2c;
+        --line: rgba(148, 163, 184, 0.13);
+        --text: #f1f5f9;
+        --muted: #8794a8;
+        --faint: #55627a;
         --blue: #38bdf8;
-        --blue-dark: #0ea5e9;
-
         --green: #34d399;
-        --yellow: #fbbf24;
+        --amber: #fbbf24;
         --red: #fb7185;
-        --purple: #a78bfa;
-
-        --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        --violet: #a78bfa;
+        --score: var(--green);
       }
-
+      html {
+        scroll-behavior: smooth;
+      }
       body {
         min-height: 100vh;
         background:
           radial-gradient(
-            circle at 15% 10%,
-            rgba(14, 165, 233, 0.1),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at 90% 20%,
-            rgba(124, 58, 237, 0.08),
+            circle at 12% 0,
+            rgba(56, 189, 248, 0.09),
             transparent 30%
           ),
           var(--bg);
-
         color: var(--text);
-
         font-family:
-          Inter,
-          ui-sans-serif,
+          "Plus Jakarta Sans",
           system-ui,
           -apple-system,
-          BlinkMacSystemFont,
           "Segoe UI",
           sans-serif;
+        line-height: 1.5;
       }
-
       button,
       input {
         font: inherit;
       }
-
       button {
         cursor: pointer;
       }
-
-      .app {
-        display: flex;
-        min-height: 100vh;
+      :focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 2px;
       }
 
-      /* SIDEBAR */
-
+      /* layout */
       .sidebar {
-        width: 250px;
-        min-height: 100vh;
-
-        background: rgba(8, 13, 24, 0.92);
-
-        border-right: 1px solid var(--border);
-
-        padding: 24px 18px;
-
         position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
+        inset: 0 auto 0 0;
+        width: 240px;
+        padding: 24px 16px;
+        background: rgba(8, 12, 20, 0.95);
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
       }
-
       .brand {
         display: flex;
-        align-items: center;
         gap: 12px;
-
-        padding: 8px 10px 28px;
+        align-items: center;
+        padding: 4px 10px 26px;
       }
-
       .brand-icon {
-        width: 42px;
-        height: 42px;
-
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
         display: grid;
         place-items: center;
-
-        border-radius: 12px;
-
+        font-size: 19px;
         background: linear-gradient(135deg, #0ea5e9, #6366f1);
-
-        box-shadow: 0 10px 30px rgba(14, 165, 233, 0.25);
-
-        font-size: 20px;
       }
-
-      .brand-text h1 {
+      .brand h1 {
         font-size: 16px;
-        font-weight: 700;
+        font-weight: 800;
       }
-
-      .brand-text span {
-        display: block;
-
-        margin-top: 3px;
-
-        color: var(--muted);
-
+      .brand span {
         font-size: 11px;
+        color: var(--muted);
       }
-
-      .nav-title {
-        padding: 0 10px;
-
-        margin-bottom: 10px;
-
-        color: #536176;
-
-        font-size: 10px;
-
-        font-weight: 700;
-
-        letter-spacing: 1.5px;
-
-        text-transform: uppercase;
-      }
-
       .nav {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 4px;
       }
-
-      .nav-item {
+      .nav a {
         display: flex;
-        align-items: center;
         gap: 12px;
-
-        padding: 12px 13px;
-
+        align-items: center;
+        padding: 11px 12px;
         border-radius: 10px;
-
-        color: #8996aa;
-
+        color: var(--muted);
+        text-decoration: none;
         font-size: 14px;
-
-        transition: 0.2s;
+        font-weight: 500;
+        transition: 0.15s;
       }
-
-      .nav-item:hover,
-      .nav-item.active {
-        background: rgba(56, 189, 248, 0.09);
-
+      .nav a:hover,
+      .nav a.active {
+        background: rgba(56, 189, 248, 0.1);
         color: #e0f2fe;
       }
-
-      .nav-icon {
-        width: 20px;
-
+      .nav i {
+        font-style: normal;
+        width: 18px;
         text-align: center;
-
-        font-size: 15px;
       }
-
-      .sidebar-bottom {
-        position: absolute;
-
-        left: 18px;
-        right: 18px;
-        bottom: 22px;
-      }
-
-      .api-status {
+      .api {
+        margin-top: auto;
         display: flex;
-        align-items: center;
         gap: 9px;
-
+        align-items: center;
         padding: 12px;
-
-        border: 1px solid var(--border);
-
+        border: 1px solid var(--line);
         border-radius: 10px;
-
-        background: rgba(52, 211, 153, 0.04);
-
-        color: #9aa7ba;
-
         font-size: 12px;
-      }
-
-      .status-dot {
-        width: 7px;
-        height: 7px;
-
-        border-radius: 50%;
-
-        background: var(--green);
-
-        box-shadow: 0 0 12px var(--green);
-      }
-
-      /* MAIN */
-
-      .main {
-        width: calc(100% - 250px);
-
-        margin-left: 250px;
-
-        padding: 30px 34px 50px;
-      }
-
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        margin-bottom: 30px;
-      }
-
-      .page-title h2 {
-        font-size: 27px;
-
-        letter-spacing: -0.5px;
-      }
-
-      .page-title p {
-        margin-top: 6px;
-
         color: var(--muted);
-
-        font-size: 13px;
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--faint);
+        flex-shrink: 0;
+      }
+      .dot.on {
+        background: var(--green);
+        box-shadow: 0 0 10px var(--green);
+      }
+      .dot.off {
+        background: var(--red);
+        box-shadow: 0 0 10px var(--red);
+      }
+      .main {
+        margin-left: 240px;
+        padding: 32px 36px 48px;
+        max-width: 1280px;
+      }
+      .page-head {
+        margin-bottom: 24px;
+      }
+      .page-head h2 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.6px;
+      }
+      .page-head p {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 4px;
       }
 
-      .live-badge {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        padding: 9px 13px;
-
-        border: 1px solid rgba(52, 211, 153, 0.18);
-
-        border-radius: 999px;
-
-        background: rgba(52, 211, 153, 0.05);
-
-        color: #86efac;
-
-        font-size: 12px;
-      }
-
-      /* SCAN BOX */
-
-      .scan-panel {
-        position: relative;
-
-        overflow: hidden;
-
-        padding: 28px;
-
-        border: 1px solid rgba(56, 189, 248, 0.14);
-
+      /* scanner */
+      .scan {
+        padding: 24px;
+        border: 1px solid rgba(56, 189, 248, 0.18);
         border-radius: 18px;
-
         background:
           linear-gradient(
             135deg,
-            rgba(14, 165, 233, 0.08),
+            rgba(14, 165, 233, 0.09),
             rgba(99, 102, 241, 0.04)
           ),
           var(--panel);
-
-        box-shadow: var(--shadow);
-
-        margin-bottom: 24px;
+        margin-bottom: 28px;
       }
-
-      .scan-panel::after {
-        content: "";
-
-        position: absolute;
-
-        width: 260px;
-        height: 260px;
-
-        right: -100px;
-        top: -130px;
-
-        border-radius: 50%;
-
-        background: rgba(56, 189, 248, 0.07);
-
-        filter: blur(10px);
-
-        pointer-events: none;
-      }
-
-      .scan-heading {
-        position: relative;
-
-        z-index: 1;
-
-        margin-bottom: 18px;
-      }
-
-      .scan-heading h3 {
+      .scan h3 {
         font-size: 17px;
+        font-weight: 700;
       }
-
-      .scan-heading p {
-        margin-top: 5px;
-
+      .scan p {
         color: var(--muted);
-
-        font-size: 12px;
+        font-size: 13px;
+        margin: 4px 0 16px;
       }
-
       .scan-form {
-        position: relative;
-
-        z-index: 2;
-
         display: flex;
-
         gap: 10px;
       }
-
       #urlInput {
         flex: 1;
-
+        min-width: 0;
         height: 50px;
-
         padding: 0 16px;
-
+        border-radius: 11px;
         border: 1px solid #26354b;
-
-        border-radius: 10px;
-
-        outline: none;
-
         background: #080e19;
-
-        color: white;
-
+        color: #fff;
         font-size: 14px;
-
-        transition: 0.2s;
       }
-
       #urlInput:focus {
-        border-color: rgba(56, 189, 248, 0.6);
-
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.08);
+        border-color: var(--blue);
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
       }
-
       #scanButton {
-        min-width: 145px;
-
+        min-width: 150px;
         height: 50px;
-
-        padding: 0 20px;
-
+        padding: 0 22px;
         border: 0;
-
-        border-radius: 10px;
-
-        background: linear-gradient(135deg, #0ea5e9, #6366f1);
-
-        color: white;
-
-        font-size: 13px;
-
+        border-radius: 11px;
+        color: #fff;
         font-weight: 700;
-
-        box-shadow: 0 10px 25px rgba(14, 165, 233, 0.18);
-
-        transition: 0.2s;
+        font-size: 14px;
+        background: linear-gradient(135deg, #0ea5e9, #6366f1);
+        transition: 0.15s;
+        display: inline-flex;
+        gap: 9px;
+        align-items: center;
+        justify-content: center;
       }
-
-      #scanButton:hover {
+      #scanButton:hover:not(:disabled) {
         transform: translateY(-1px);
-
-        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.25);
+        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.28);
       }
-
       #scanButton:disabled {
-        opacity: 0.6;
-
-        cursor: not-allowed;
-
-        transform: none;
+        opacity: 0.65;
+        cursor: wait;
       }
-
-      #statusMessage {
-        position: relative;
-
-        z-index: 2;
-
-        margin-top: 12px;
-
-        padding: 10px 13px;
-
-        border-radius: 9px;
-
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
         display: none;
-
-        font-size: 12px;
       }
-
-      .success {
-        display: block !important;
-
-        background: rgba(52, 211, 153, 0.08);
-
-        border: 1px solid rgba(52, 211, 153, 0.15);
-
+      .loading .spinner {
+        display: block;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #statusMessage {
+        display: none;
+        margin-top: 12px;
+        padding: 10px 13px;
+        border-radius: 9px;
+        font-size: 13px;
+      }
+      #statusMessage.success {
+        display: block;
+        background: rgba(52, 211, 153, 0.09);
+        border: 1px solid rgba(52, 211, 153, 0.2);
         color: #86efac;
       }
-
-      .error {
-        display: block !important;
-
-        background: rgba(251, 113, 133, 0.08);
-
-        border: 1px solid rgba(251, 113, 133, 0.15);
-
+      #statusMessage.error {
+        display: block;
+        background: rgba(251, 113, 133, 0.09);
+        border: 1px solid rgba(251, 113, 133, 0.2);
         color: #fda4af;
       }
-
-      .info {
-        display: block !important;
-
-        background: rgba(56, 189, 248, 0.08);
-
-        border: 1px solid rgba(56, 189, 248, 0.15);
-
+      #statusMessage.info {
+        display: block;
+        background: rgba(56, 189, 248, 0.09);
+        border: 1px solid rgba(56, 189, 248, 0.2);
         color: #7dd3fc;
       }
 
-      /* SECTION */
-
-      .section-header {
+      /* sections */
+      .sec {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-
-        margin-bottom: 13px;
+        align-items: baseline;
+        margin: 0 0 12px;
       }
-
-      .section-header h3 {
-        font-size: 13px;
-
-        letter-spacing: 0.2px;
+      .sec h3 {
+        font-size: 14px;
+        font-weight: 700;
       }
-
-      .section-header span {
-        color: #607089;
-
-        font-size: 11px;
+      .sec span {
+        font-size: 12px;
+        color: var(--faint);
       }
-
-      /* STATS */
-
-      .stats-grid {
+      .grid4 {
         display: grid;
-
         grid-template-columns: repeat(4, minmax(0, 1fr));
-
-        gap: 13px;
-
-        margin-bottom: 25px;
+        gap: 14px;
+        margin-bottom: 28px;
       }
-
-      .stat-card {
-        position: relative;
-
-        padding: 19px;
-
-        overflow: hidden;
-
-        border: 1px solid var(--border);
-
+      .grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 28px;
+      }
+      .card {
+        padding: 18px;
+        border: 1px solid var(--line);
         border-radius: 14px;
-
-        background:
-          linear-gradient(
-            145deg,
-            rgba(255, 255, 255, 0.025),
-            rgba(255, 255, 255, 0.01)
-          ),
-          var(--panel);
-
-        transition: 0.2s;
+        background: var(--panel);
       }
-
-      .stat-card:hover {
-        border-color: rgba(148, 163, 184, 0.2);
-
-        transform: translateY(-2px);
-      }
-
-      .stat-top {
+      .card .label {
+        font-size: 12px;
+        color: var(--muted);
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
-
-      .stat-label {
-        color: var(--muted);
-
-        font-size: 11px;
+      .card .num {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.6px;
+        margin-top: 10px;
       }
-
-      .stat-icon {
-        width: 30px;
-        height: 30px;
-
+      .card .note {
+        font-size: 11px;
+        color: var(--faint);
+        margin-top: 2px;
+      }
+      .ic {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
         display: grid;
         place-items: center;
-
-        border-radius: 8px;
-
         font-size: 13px;
+        font-weight: 700;
       }
-
-      .icon-blue {
-        background: rgba(56, 189, 248, 0.09);
+      .c-blue {
+        background: rgba(56, 189, 248, 0.12);
         color: var(--blue);
       }
-
-      .icon-green {
-        background: rgba(52, 211, 153, 0.09);
+      .c-green {
+        background: rgba(52, 211, 153, 0.12);
         color: var(--green);
       }
-
-      .icon-red {
-        background: rgba(251, 113, 133, 0.09);
+      .c-red {
+        background: rgba(251, 113, 133, 0.12);
         color: var(--red);
       }
-
-      .icon-purple {
-        background: rgba(167, 139, 250, 0.09);
-        color: var(--purple);
+      .c-amber {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--amber);
       }
-
-      .stat-number {
-        margin-top: 13px;
-
-        font-size: 27px;
-
-        font-weight: 750;
-
-        letter-spacing: -0.5px;
-      }
-
-      .stat-note {
-        margin-top: 4px;
-
-        color: #58667b;
-
-        font-size: 10px;
-      }
-
-      /* GRID */
-
-      .content-grid {
-        display: grid;
-
-        grid-template-columns: 0.85fr 1.15fr;
-
-        gap: 18px;
-
-        margin-bottom: 25px;
+      .c-violet {
+        background: rgba(167, 139, 250, 0.12);
+        color: var(--violet);
       }
 
       .panel {
-        border: 1px solid var(--border);
-
+        border: 1px solid var(--line);
         border-radius: 15px;
-
         background: var(--panel);
-
         overflow: hidden;
       }
-
-      .panel-header {
+      .panel-head {
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        padding: 18px 20px;
-
-        border-bottom: 1px solid var(--border);
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+      }
+      .panel-head h3 {
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .panel-head span {
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 18px;
+        margin-bottom: 28px;
       }
 
-      .panel-header h3 {
-        font-size: 13px;
-      }
-
-      .panel-header span {
-        color: #607089;
-
-        font-size: 11px;
-      }
-
-      /* SCORE */
-
+      /* score */
       .score-body {
         display: flex;
-
+        gap: 24px;
         align-items: center;
-
-        gap: 25px;
-
-        padding: 25px;
+        padding: 24px;
       }
-
-      .score-ring {
-        width: 145px;
-        height: 145px;
-
+      .ring {
+        --angle: 360deg;
+        width: 140px;
+        height: 140px;
         flex-shrink: 0;
-
+        border-radius: 50%;
         display: grid;
         place-items: center;
-
-        border-radius: 50%;
-
-        background: conic-gradient(
-          var(--green) 0deg,
-          var(--green) var(--score-angle, 360deg),
-          #1d293b var(--score-angle, 360deg)
-        );
-
         position: relative;
+        background: conic-gradient(var(--score) var(--angle), #1c2738 0);
+        transition: background 0.6s;
       }
-
-      .score-ring::before {
+      .ring::before {
         content: "";
-
         position: absolute;
-
-        inset: 9px;
-
+        inset: 10px;
         border-radius: 50%;
-
         background: var(--panel);
       }
-
-      .score-value {
+      .ring div {
         position: relative;
-
-        z-index: 2;
-
         text-align: center;
       }
-
-      .score-value strong {
+      .ring strong {
         display: block;
-
         font-size: 34px;
+        font-weight: 800;
+        line-height: 1;
       }
-
-      .score-value span {
-        color: var(--muted);
-
-        font-size: 10px;
-      }
-
-      .score-info h4 {
-        font-size: 15px;
-
-        margin-bottom: 8px;
-      }
-
-      .score-info p {
-        color: var(--muted);
-
+      .ring span {
         font-size: 11px;
-
-        line-height: 1.6;
+        color: var(--muted);
+      }
+      .score-info h4 {
+        font-size: 16px;
+        margin-bottom: 6px;
+      }
+      .score-info p {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 34ch;
       }
 
-      /* WEBSITE */
-
-      .website-body {
-        padding: 21px;
+      /* website */
+      .web-body {
+        padding: 20px;
       }
-
-      .website-url {
-        color: #dbeafe;
-
+      .web-url {
         font-size: 14px;
-
+        color: #dbeafe;
         word-break: break-all;
-
-        margin-bottom: 17px;
+        margin-bottom: 16px;
+        font-weight: 600;
       }
-
-      .website-meta {
+      .meta {
         display: grid;
-
-        grid-template-columns: repeat(2, 1fr);
-
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
-
-      .meta-box {
-        padding: 13px;
-
-        border: 1px solid var(--border);
-
-        border-radius: 9px;
-
+      .meta div {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
         background: rgba(255, 255, 255, 0.015);
+        min-width: 0;
       }
-
-      .meta-box label {
+      .meta label {
         display: block;
-
-        color: #59687e;
-
-        font-size: 10px;
-
-        margin-bottom: 5px;
-
-        text-transform: uppercase;
-
-        letter-spacing: 0.6px;
+        font-size: 11px;
+        color: var(--faint);
+        margin-bottom: 3px;
       }
-
-      .meta-box strong {
+      .meta strong {
         font-size: 13px;
+        word-break: break-word;
       }
 
-      .status-ok {
-        color: var(--green);
-      }
-
-      /* ISSUES */
-
-      .issues-panel {
-        margin-bottom: 25px;
-      }
-
-      .issue-list {
-        padding: 5px 0;
-      }
-
+      /* issues */
       .issue-row {
         display: grid;
-
-        grid-template-columns: 100px 1fr 75px;
-
+        grid-template-columns: 130px 1fr 80px;
+        gap: 16px;
         align-items: center;
-
-        gap: 15px;
-
-        padding: 15px 20px;
-
-        border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+        padding: 14px 20px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.07);
       }
-
       .issue-row:last-child {
         border-bottom: 0;
       }
-
       .issue-type {
+        font-size: 12px;
+        font-weight: 700;
         color: #dbeafe;
-
-        font-size: 11px;
-
-        font-weight: 700;
+        word-break: break-word;
       }
-
-      .issue-message {
+      .issue-msg {
+        font-size: 13px;
         color: var(--muted);
-
-        font-size: 11px;
-
-        overflow: hidden;
-
-        text-overflow: ellipsis;
-
-        white-space: nowrap;
+        word-break: break-word;
       }
-
-      .severity {
+      .sev {
         justify-self: end;
-
-        padding: 5px 9px;
-
+        padding: 4px 10px;
         border-radius: 999px;
-
-        font-size: 9px;
-
+        font-size: 11px;
         font-weight: 700;
-
-        text-transform: uppercase;
       }
-
-      .severity-high {
-        background: rgba(251, 113, 133, 0.1);
-
+      .sev-high {
+        background: rgba(251, 113, 133, 0.12);
         color: #fda4af;
       }
-
-      .severity-medium {
-        background: rgba(251, 191, 36, 0.1);
-
+      .sev-medium {
+        background: rgba(251, 191, 36, 0.12);
         color: #fcd34d;
       }
-
-      .severity-low {
-        background: rgba(56, 189, 248, 0.1);
-
+      .sev-low {
+        background: rgba(56, 189, 248, 0.12);
         color: #7dd3fc;
       }
-
-      .no-issues {
-        padding: 30px;
-
+      .empty-state {
+        padding: 34px;
         text-align: center;
-
-        color: #64748b;
-
-        font-size: 12px;
+        color: var(--muted);
+        font-size: 13px;
       }
-
-      .no-issues .check {
-        width: 40px;
-        height: 40px;
-
+      .empty-state b {
         display: grid;
         place-items: center;
-
+        width: 40px;
+        height: 40px;
         margin: 0 auto 10px;
-
         border-radius: 50%;
-
-        background: rgba(52, 211, 153, 0.08);
-
+        background: rgba(52, 211, 153, 0.1);
         color: var(--green);
-
-        font-size: 17px;
       }
 
-      /* TABLE */
-
-      .table-wrapper {
+      /* table */
+      .table-wrap {
         overflow-x: auto;
       }
-
       table {
         width: 100%;
-
         border-collapse: collapse;
+        min-width: 640px;
       }
-
       th {
         padding: 12px 20px;
-
         text-align: left;
-
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--faint);
         background: rgba(255, 255, 255, 0.015);
-
-        border-bottom: 1px solid var(--border);
-
-        color: #5e6c80;
-
-        font-size: 9px;
-
-        font-weight: 700;
-
-        text-transform: uppercase;
-
-        letter-spacing: 0.7px;
+        border-bottom: 1px solid var(--line);
       }
-
       td {
-        padding: 14px 20px;
-
-        border-bottom: 1px solid rgba(148, 163, 184, 0.06);
-
-        color: #aeb9c9;
-
-        font-size: 11px;
+        padding: 13px 20px;
+        font-size: 13px;
+        color: #b4bfcf;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.07);
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
-
       tbody tr:hover {
-        background: rgba(255, 255, 255, 0.018);
+        background: rgba(255, 255, 255, 0.02);
       }
-
-      .table-status {
+      tr.clickable {
+        cursor: pointer;
+      }
+      .pill {
         display: inline-flex;
-
+        gap: 6px;
         align-items: center;
-
-        gap: 5px;
-
-        color: var(--green);
-
         font-weight: 700;
       }
-
-      .table-status::before {
+      .pill::before {
         content: "";
-
-        width: 5px;
-        height: 5px;
-
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
-
         background: currentColor;
       }
-
-      .empty,
-      .loading {
-        text-align: center;
-
-        padding: 25px;
-
-        color: #64748b;
+      .pill.ok {
+        color: var(--green);
       }
-
-      /* FOOTER */
-
+      .pill.bad {
+        color: var(--red);
+      }
+      .empty,
+      .loading-row {
+        text-align: center;
+        color: var(--faint);
+        padding: 26px;
+      }
       .footer {
         display: flex;
         justify-content: space-between;
-
-        padding-top: 22px;
-
-        color: #46536a;
-
-        font-size: 10px;
+        margin-top: 26px;
+        font-size: 12px;
+        color: var(--faint);
       }
 
-      /* RESPONSIVE */
-
       @media (max-width: 1100px) {
-        .stats-grid {
+        .grid4 {
           grid-template-columns: repeat(2, 1fr);
         }
-
-        .content-grid {
+        .two {
           grid-template-columns: 1fr;
         }
       }
-
       @media (max-width: 800px) {
         .sidebar {
-          width: 70px;
-
+          width: 68px;
           padding: 18px 10px;
         }
-
         .brand {
           justify-content: center;
+          padding-inline: 0;
         }
-
-        .brand-text,
-        .nav-title,
-        .nav-item span,
-        .api-status span {
+        .brand div:last-child,
+        .nav a span,
+        .api span {
           display: none;
         }
-
-        .nav-item {
+        .nav a,
+        .api {
           justify-content: center;
         }
-
-        .sidebar-bottom {
-          left: 10px;
-          right: 10px;
-        }
-
-        .api-status {
-          justify-content: center;
-        }
-
         .main {
-          width: calc(100% - 70px);
-
-          margin-left: 70px;
-
-          padding: 22px 18px;
+          margin-left: 68px;
+          padding: 22px 16px;
         }
       }
-
       @media (max-width: 600px) {
-        .topbar {
-          align-items: flex-start;
-
-          gap: 15px;
-
-          flex-direction: column;
-        }
-
-        .live-badge {
-          align-self: flex-start;
-        }
-
-        .scan-panel {
-          padding: 20px;
-        }
-
         .scan-form {
           flex-direction: column;
         }
-
         #scanButton {
           width: 100%;
         }
-
-        .stats-grid {
-          grid-template-columns: 1fr 1fr;
-
-          gap: 9px;
+        .grid3 {
+          grid-template-columns: 1fr;
         }
-
-        .stat-card {
+        .grid4 {
+          gap: 10px;
+        }
+        .card {
           padding: 14px;
         }
-
-        .stat-number {
+        .card .num {
           font-size: 22px;
         }
-
         .score-body {
           flex-direction: column;
-
           text-align: center;
         }
-
-        .website-meta {
+        .meta {
           grid-template-columns: 1fr;
         }
-
         .issue-row {
           grid-template-columns: 1fr;
-
-          gap: 7px;
+          gap: 6px;
         }
-
-        .severity {
+        .sev {
           justify-self: start;
         }
-
         .footer {
           flex-direction: column;
-
-          gap: 6px;
+          gap: 4px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
         }
       }
     </style>
   </head>
-
   <body>
-    <div class="app">
-      <!-- SIDEBAR -->
-
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-icon">◈</div>
-
-          <div class="brand-text">
-            <h1>QA Sentinel</h1>
-
-            <span>Website Intelligence</span>
-          </div>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">◈</div>
+        <div>
+          <h1>QA Sentinel</h1>
+          <span>Website intelligence</span>
         </div>
+      </div>
+      <nav class="nav">
+        <a href="#dashboard" class="active"><i>◉</i><span>Dashboard</span></a>
+        <a href="#scanner"><i>⌕</i><span>Website scanner</span></a>
+        <a href="#issues"><i>⚠</i><span>Issues</span></a>
+        <a href="#history"><i>◷</i><span>Scan history</span></a>
+      </nav>
+      <div class="api">
+        <div class="dot" id="apiDot"></div>
+        <span id="apiText">Checking API…</span>
+      </div>
+    </aside>
 
-        <div class="nav-title">Workspace</div>
+    <main class="main" id="dashboard">
+      <div class="page-head">
+        <h2>Quality dashboard</h2>
+        <p>
+          Scan a page and see broken links, missing images and script errors in
+          one place.
+        </p>
+      </div>
 
-        <nav class="nav">
-          <div class="nav-item active">
-            <div class="nav-icon">◉</div>
-
-            <span>Dashboard</span>
-          </div>
-
-          <div class="nav-item">
-            <div class="nav-icon">⌕</div>
-
-            <span>Website Scanner</span>
-          </div>
-
-          <div class="nav-item">
-            <div class="nav-icon">⚠</div>
-
-            <span>Issues</span>
-          </div>
-
-          <div class="nav-item">
-            <div class="nav-icon">◷</div>
-
-            <span>Scan History</span>
-          </div>
-        </nav>
-
-        <div class="sidebar-bottom">
-          <div class="api-status">
-            <div class="status-dot"></div>
-
-            <span> API Connected </span>
-          </div>
+      <section class="scan" id="scanner">
+        <h3>Scan a website</h3>
+        <p>Enter a full URL, including http:// or https://.</p>
+        <div class="scan-form">
+          <input
+            type="text"
+            id="urlInput"
+            placeholder="https://example.com"
+            value="https://httpbin.org"
+            autocomplete="off"
+          />
+          <button type="button" id="scanButton">
+            <span class="spinner"></span><span id="scanLabel">Run QA scan</span>
+          </button>
         </div>
-      </aside>
+        <div id="statusMessage" role="status"></div>
+      </section>
 
-      <!-- MAIN -->
-
-      <main class="main">
-        <!-- HEADER -->
-
-        <div class="topbar">
-          <div class="page-title">
-            <h2>Quality Dashboard</h2>
-
-            <p>Monitor website health and discover issues faster.</p>
+      <div class="sec">
+        <h3>Links and images</h3>
+        <span>Latest scan</span>
+      </div>
+      <section class="grid4">
+        <div class="card">
+          <div class="label">
+            Total links
+            <div class="ic c-blue">↗</div>
           </div>
-
-          <div class="live-badge">
-            <div class="status-dot"></div>
-
-            System operational
-          </div>
+          <div class="num" id="totalLinks">0</div>
+          <div class="note">Discovered on the page</div>
         </div>
-
-        <!-- SCANNER -->
-
-        <section class="scan-panel">
-          <div class="scan-heading">
-            <h3>Scan a website</h3>
-
-            <p>Enter a URL and run automated quality checks.</p>
+        <div class="card">
+          <div class="label">
+            Working links
+            <div class="ic c-green">✓</div>
           </div>
-
-          <div class="scan-form">
-            <input
-              type="text"
-              id="urlInput"
-              placeholder="https://example.com"
-              value="https://httpbin.org"
-            />
-
-            <button type="button" id="scanButton">Run QA Scan</button>
-          </div>
-
-          <div id="statusMessage"></div>
-        </section>
-
-        <!-- STATS -->
-
-        <div class="section-header">
-          <h3>Scan Overview</h3>
-
-          <span> Latest scan </span>
+          <div class="num" id="workingLinks">0</div>
+          <div class="note">Healthy responses</div>
         </div>
-
-        <section class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Total Links </span>
-
-              <div class="stat-icon icon-blue">↗</div>
-            </div>
-
-            <div class="stat-number" id="totalLinks">0</div>
-
-            <div class="stat-note">Links discovered</div>
+        <div class="card">
+          <div class="label">
+            Broken links
+            <div class="ic c-red">!</div>
           </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Working Links </span>
-
-              <div class="stat-icon icon-green">✓</div>
-            </div>
-
-            <div class="stat-number" id="workingLinks">0</div>
-
-            <div class="stat-note">Healthy responses</div>
+          <div class="num" id="brokenLinks">0</div>
+          <div class="note">Need a fix</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            Skipped links
+            <div class="ic c-amber">–</div>
           </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Broken Links </span>
-
-              <div class="stat-icon icon-red">!</div>
-            </div>
-
-            <div class="stat-number" id="brokenLinks">0</div>
-
-            <div class="stat-note">Need attention</div>
+          <div class="num" id="skippedLinks">0</div>
+          <div class="note">Not checked</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            Total images
+            <div class="ic c-violet">◇</div>
           </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Total Images </span>
-
-              <div class="stat-icon icon-purple">◇</div>
-            </div>
-
-            <div class="stat-number" id="totalImages">0</div>
-
-            <div class="stat-note">Images discovered</div>
+          <div class="num" id="totalImages">0</div>
+          <div class="note">Discovered on the page</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            Working images
+            <div class="ic c-green">✓</div>
           </div>
-        </section>
+          <div class="num" id="workingImages">0</div>
+          <div class="note">Loaded correctly</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            Broken images
+            <div class="ic c-red">!</div>
+          </div>
+          <div class="num" id="brokenImages">0</div>
+          <div class="note">Missing files</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            JavaScript errors
+            <div class="ic c-violet">JS</div>
+          </div>
+          <div class="num" id="jsErrors">0</div>
+          <div class="note">Console errors</div>
+        </div>
+      </section>
 
-        <!-- SCORE + WEBSITE -->
-
-        <section class="content-grid">
-          <div class="panel">
-            <div class="panel-header">
-              <h3>QA Health Score</h3>
-
-              <span> Current scan </span>
-            </div>
-
-            <div class="score-body">
-              <div class="score-ring" id="scoreRing">
-                <div class="score-value">
-                  <strong id="qaScore"> 100 </strong>
-
-                  <span> / 100 </span>
-                </div>
+      <section class="two">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Health score</h3>
+            <span>Current scan</span>
+          </div>
+          <div class="score-body">
+            <div class="ring" id="scoreRing">
+              <div>
+                <strong id="qaScore">100</strong><span>out of 100</span>
               </div>
-
-              <div class="score-info">
-                <h4 id="scoreTitle">Excellent health</h4>
-
-                <p id="scoreDescription">
-                  No major quality problems were detected in the latest scan.
-                </p>
+            </div>
+            <div class="score-info">
+              <h4 id="scoreTitle">Run a scan to begin</h4>
+              <p id="scoreDescription">
+                Your score appears here after the first scan.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Website details</h3>
+            <span>Scan information</span>
+          </div>
+          <div class="web-body">
+            <div class="web-url" id="websiteUrl">No website scanned yet</div>
+            <div class="meta">
+              <div>
+                <label>HTTP status</label><strong id="statusCode">—</strong>
+              </div>
+              <div><label>Scan ID</label><strong id="scanId">—</strong></div>
+              <div>
+                <label>Page title</label><strong id="pageTitle">—</strong>
+              </div>
+              <div>
+                <label>Total issues</label><strong id="totalIssues">0</strong>
               </div>
             </div>
           </div>
-
-          <div class="panel">
-            <div class="panel-header">
-              <h3>Website Details</h3>
-
-              <span> Scan information </span>
-            </div>
-
-            <div class="website-body">
-              <div class="website-url" id="websiteUrl">
-                No website scanned yet
-              </div>
-
-              <div class="website-meta">
-                <div class="meta-box">
-                  <label> HTTP Status </label>
-
-                  <strong id="statusCode" class="status-ok"> — </strong>
-                </div>
-
-                <div class="meta-box">
-                  <label> Scan ID </label>
-
-                  <strong id="scanId"> — </strong>
-                </div>
-
-                <div class="meta-box">
-                  <label> Page Title </label>
-
-                  <strong id="pageTitle"> — </strong>
-                </div>
-
-                <div class="meta-box">
-                  <label> Skipped Links </label>
-
-                  <strong id="skippedLinks"> 0 </strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SECONDARY STATS -->
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Working Images </span>
-
-              <div class="stat-icon icon-green">✓</div>
-            </div>
-
-            <div class="stat-number" id="workingImages">0</div>
-
-            <div class="stat-note">Healthy assets</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Broken Images </span>
-
-              <div class="stat-icon icon-red">!</div>
-            </div>
-
-            <div class="stat-number" id="brokenImages">0</div>
-
-            <div class="stat-note">Missing assets</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> JavaScript Errors </span>
-
-              <div class="stat-icon icon-purple">JS</div>
-            </div>
-
-            <div class="stat-number" id="jsErrors">0</div>
-
-            <div class="stat-note">Console errors</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <span class="stat-label"> Total Issues </span>
-
-              <div class="stat-icon icon-red">⚠</div>
-            </div>
-
-            <div class="stat-number" id="totalIssues">0</div>
-
-            <div class="stat-note">Detected problems</div>
-          </div>
         </div>
+      </section>
 
-        <!-- ISSUES -->
-
-        <section class="panel issues-panel">
-          <div class="panel-header">
-            <h3>Detected Issues</h3>
-
-            <span id="issueCountLabel"> No issues </span>
+      <div class="sec">
+        <h3>Issue severity</h3>
+        <span>Latest scan</span>
+      </div>
+      <section class="grid3">
+        <div class="card">
+          <div class="label">
+            High
+            <div class="ic c-red">!</div>
           </div>
-
-          <div class="issue-list" id="issuesList">
-            <div class="no-issues">
-              <div class="check">✓</div>
-
-              No issues detected yet.
-            </div>
+          <div class="num" id="highIssues">0</div>
+          <div class="note">Critical problems</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            Medium
+            <div class="ic c-amber">!</div>
           </div>
-        </section>
-
-        <!-- HISTORY -->
-
-        <section class="panel">
-          <div class="panel-header">
-            <h3>Recent Scans</h3>
-
-            <span> Scan history </span>
+          <div class="num" id="mediumIssues">0</div>
+          <div class="note">Worth reviewing</div>
+        </div>
+        <div class="card">
+          <div class="label">
+            Low
+            <div class="ic c-blue">!</div>
           </div>
+          <div class="num" id="lowIssues">0</div>
+          <div class="note">Minor problems</div>
+        </div>
+      </section>
 
-          <div class="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
+      <section class="panel" id="issues" style="margin-bottom: 28px">
+        <div class="panel-head">
+          <h3>Detected issues</h3>
+          <span id="issueCount">0 issues</span>
+        </div>
+        <div id="issueList">
+          <div class="empty-state"><b>⌕</b>Run a scan to see issues.</div>
+        </div>
+      </section>
 
-                  <th>Website</th>
+      <section class="panel" id="history">
+        <div class="panel-head">
+          <h3>Recent scans</h3>
+          <span>Scan history</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Website</th>
+                <th>Status</th>
+                <th>Issues</th>
+                <th>Page title</th>
+                <th>Scan time</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <tr>
+                <td colspan="6" class="loading-row">Loading scan history…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-                  <th>Status</th>
-
-                  <th>Issues</th>
-
-                  <th>Page Title</th>
-
-                  <th>Scan Time</th>
-                </tr>
-              </thead>
-
-              <tbody id="historyTableBody">
-                <tr>
-                  <td colspan="5" class="loading">Loading scan history...</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <footer class="footer">
-          <span> QA Sentinel · Smart Website QA Agent </span>
-
-          <span> Automated quality testing </span>
-        </footer>
-      </main>
-    </div>
+      <footer class="footer">
+        <span>QA Sentinel · Smart website QA agent</span
+        ><span>Automated quality testing</span>
+      </footer>
+    </main>
 
     <script>
       const API_URL = "http://127.0.0.1:8000";
 
-      const scanButton = document.getElementById("scanButton");
-
-      const urlInput = document.getElementById("urlInput");
-
-      const statusMessage = document.getElementById("statusMessage");
+      const $ = (id) => document.getElementById(id);
+      const scanButton = $("scanButton");
+      const urlInput = $("urlInput");
+      const statusMessage = $("statusMessage");
 
       function setText(id, value) {
-        const element = document.getElementById(id);
-
-        if (element) {
-          element.textContent = value ?? "-";
-        }
+        const el = $(id);
+        if (el) el.textContent = value ?? "-";
       }
 
       function showStatus(message, type) {
         statusMessage.textContent = message;
-
         statusMessage.className = type;
-      }
-
-      function calculateScore(brokenLinks, brokenImages, jsErrors) {
-        let score = 100;
-        score -= brokenLinks * 10;
-        score -= brokenImages * 5;
-        score -= jsErrors * 10;
-        return Math.max(0, Math.min(100, score));
-      }
-
-      function updateScore(score) {
-        setText("qaScore", score);
-
-        const ring = document.getElementById("scoreRing");
-
-        const angle = score * 3.6;
-
-        ring.style.setProperty("--score-angle", `${angle}deg`);
-
-        const title = document.getElementById("scoreTitle");
-
-        const description = document.getElementById("scoreDescription");
-
-        if (score >= 90) {
-          title.textContent = "Excellent health";
-
-          description.textContent =
-            "Your website passed almost all major quality checks.";
-        } else if (score >= 75) {
-          title.textContent = "Very good health";
-
-          description.textContent =
-            "Your website is in good shape with only minor issues.";
-        } else if (score >= 50) {
-          title.textContent = "Needs attention";
-
-          description.textContent =
-            "Some website issues were detected and should be reviewed.";
-        } else if (score >= 25) {
-          title.textContent = "Poor health";
-
-          description.textContent =
-            "Several website issues were detected and need attention.";
-        } else {
-          title.textContent = "Critical health";
-
-          description.textContent =
-            "Major website issues were detected and require immediate attention.";
-        }
-      }
-
-      function displayScanResult(data) {
-        console.log("SCAN RESPONSE:", data);
-
-        if (!data || !data.report) {
-          throw new Error("Invalid response received from API.");
-        }
-
-        const report = data.report;
-
-        const scan = report.scan || {};
-
-        const links = report.links || {};
-
-        const images = report.images || {};
-
-        const javascript = report.javascript || {};
-
-        const issues = report.issues || [];
-
-        const jsErrorCount = javascript.console_errors ?? 0;
-
-        setText("totalLinks", links.total ?? 0);
-
-        setText("workingLinks", links.working ?? 0);
-
-        setText("brokenLinks", links.broken ?? 0);
-
-        setText("skippedLinks", links.skipped ?? 0);
-
-        setText("totalImages", images.total ?? 0);
-
-        setText("workingImages", images.working ?? 0);
-
-        setText("brokenImages", images.broken ?? 0);
-
-        setText("jsErrors", jsErrorCount);
-
-        setText("totalIssues", issues.length);
-
-        setText("websiteUrl", scan.url ?? data.url ?? "-");
-
-        setText("statusCode", scan.status_code ?? "-");
-
-        setText("pageTitle", scan.page_title ?? "-");
-
-        setText("scanId", scan.scan_id ?? "-");
-
-        const score = calculateScore(
-          links.broken ?? 0,
-          images.broken ?? 0,
-          jsErrorCount,
-        );
-
-        updateScore(score);
-
-        displayIssues(issues);
-      }
-
-      function displayIssues(issues) {
-        const container = document.getElementById("issuesList");
-
-        const countLabel = document.getElementById("issueCountLabel");
-
-        container.innerHTML = "";
-
-        if (!issues.length) {
-          countLabel.textContent = "No issues";
-
-          container.innerHTML = `
-
-                <div class="no-issues">
-
-                    <div class="check">
-                        ✓
-                    </div>
-
-                    No issues detected in the latest scan.
-
-                </div>
-
-            `;
-
-          return;
-        }
-
-        countLabel.textContent = `${issues.length} issue${issues.length > 1 ? "s" : ""}`;
-
-        issues.forEach((issue) => {
-          const row = document.createElement("div");
-
-          row.className = "issue-row";
-
-          const severity = String(issue.severity ?? "MEDIUM").toLowerCase();
-
-          let severityClass = "severity-medium";
-
-          if (severity === "high") {
-            severityClass = "severity-high";
-          } else if (severity === "low") {
-            severityClass = "severity-low";
-          }
-
-          row.innerHTML = `
-
-                <div class="issue-type">
-                    ${escapeHtml(issue.issue_type ?? "UNKNOWN")}
-                </div>
-
-                <div
-                    class="issue-message"
-                    title="${escapeHtml(issue.message ?? "")}"
-                >
-                    ${escapeHtml(issue.message ?? "No description")}
-                </div>
-
-                <div
-                    class="severity ${severityClass}"
-                >
-                    ${escapeHtml(issue.severity ?? "MEDIUM")}
-                </div>
-
-            `;
-
-          container.appendChild(row);
-        });
       }
 
       function escapeHtml(value) {
         return String(value)
           .replaceAll("&", "&amp;")
-
           .replaceAll("<", "&lt;")
-
           .replaceAll(">", "&gt;")
-
           .replaceAll('"', "&quot;")
-
           .replaceAll("'", "&#039;");
       }
 
+      function formatDate(value) {
+        if (!value) return "-";
+        const d = new Date(value);
+        return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString();
+      }
+
+      /* ---------- score ---------- */
+      function calculateScore(brokenLinks, brokenImages, jsErrors) {
+        const score = 100 - brokenLinks * 10 - brokenImages * 5 - jsErrors * 10;
+        return Math.max(0, Math.min(100, score));
+      }
+
+      function updateScore(score) {
+        setText("qaScore", score);
+        const ring = $("scoreRing");
+        ring.style.setProperty("--angle", `${score * 3.6}deg`);
+
+        let color = "var(--green)",
+          title,
+          text;
+        if (score >= 90) {
+          title = "Excellent health";
+          text = "Your website passed almost all major quality checks.";
+        } else if (score >= 75) {
+          color = "var(--blue)";
+          title = "Very good health";
+          text = "Your website is in good shape with only minor issues.";
+        } else if (score >= 50) {
+          color = "var(--amber)";
+          title = "Needs attention";
+          text = "Some issues were detected and should be reviewed.";
+        } else if (score >= 25) {
+          color = "var(--red)";
+          title = "Poor health";
+          text = "Several issues were detected and need attention.";
+        } else {
+          color = "var(--red)";
+          title = "Critical health";
+          text = "Major issues were detected and need immediate attention.";
+        }
+        ring.style.setProperty("--score", color);
+        setText("scoreTitle", title);
+        setText("scoreDescription", text);
+      }
+
+      /* ---------- issues ---------- */
+      function displayIssues(issues) {
+        const container = $("issueList");
+        const countLabel = $("issueCount");
+        if (!container || !countLabel) return;
+
+        container.innerHTML = "";
+
+        if (!issues.length) {
+          countLabel.textContent = "0 issues";
+          container.innerHTML = `<div class="empty-state"><b>✓</b>No issues found. This page looks healthy.</div>`;
+          return;
+        }
+
+        countLabel.textContent = `${issues.length} issue${issues.length === 1 ? "" : "s"}`;
+
+        issues.forEach((issue) => {
+          const severity = String(issue.severity ?? "MEDIUM").toLowerCase();
+          const cls = ["high", "medium", "low"].includes(severity)
+            ? severity
+            : "medium";
+
+          const row = document.createElement("div");
+          row.className = "issue-row";
+          row.innerHTML = `
+      <div class="issue-type">${escapeHtml(issue.issue_type ?? "UNKNOWN")}</div>
+      <div class="issue-msg">${escapeHtml(issue.message ?? "No description")}</div>
+      <div class="sev sev-${cls}">${escapeHtml(issue.severity ?? "MEDIUM")}</div>`;
+          container.appendChild(row);
+        });
+      }
+
+      /* ---------- scan result ---------- */
+      function displayScanResult(data) {
+        if (!data || !data.report)
+          throw new Error("Invalid response received from API.");
+
+        const report = data.report;
+        const scan = report.scan || {};
+        const links = report.links || {};
+        const images = report.images || {};
+        const js = report.javascript || {};
+        const issues = report.issues || [];
+
+        const countSeverity = (level) =>
+          issues.filter(
+            (i) => String(i.severity ?? "MEDIUM").toUpperCase() === level,
+          ).length;
+
+        setText("highIssues", countSeverity("HIGH"));
+        setText("mediumIssues", countSeverity("MEDIUM"));
+        setText("lowIssues", countSeverity("LOW"));
+
+        const jsErrorCount = js.console_errors ?? 0;
+
+        setText("totalLinks", links.total ?? 0);
+        setText("workingLinks", links.working ?? 0);
+        setText("brokenLinks", links.broken ?? 0);
+        setText("skippedLinks", links.skipped ?? 0);
+        setText("totalImages", images.total ?? 0);
+        setText("workingImages", images.working ?? 0);
+        setText("brokenImages", images.broken ?? 0);
+        setText("jsErrors", jsErrorCount);
+        setText("totalIssues", issues.length);
+
+        setText("websiteUrl", scan.url ?? data.url ?? "-");
+        setText("statusCode", scan.status_code ?? "-");
+        setText("pageTitle", scan.page_title ?? "-");
+        setText("scanId", scan.scan_id ?? "-");
+
+        updateScore(
+          calculateScore(links.broken ?? 0, images.broken ?? 0, jsErrorCount),
+        );
+        displayIssues(issues);
+      }
+
+      /* ---------- API calls ---------- */
       async function scanWebsite() {
         const url = urlInput.value.trim();
 
-        if (!url) {
-          showStatus("Please enter a website URL.", "error");
-
-          return;
-        }
-
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-          showStatus("URL must start with http:// or https://", "error");
-
-          return;
-        }
+        if (!url) return showStatus("Enter a website URL to scan.", "error");
+        if (!/^https?:\/\//i.test(url))
+          return showStatus(
+            "The URL must start with http:// or https://",
+            "error",
+          );
 
         scanButton.disabled = true;
-
-        scanButton.textContent = "Scanning...";
-
-        showStatus("Running automated QA checks...", "info");
+        scanButton.classList.add("loading");
+        setText("scanLabel", "Scanning…");
+        showStatus(
+          "Running automated QA checks. This can take a few seconds.",
+          "info",
+        );
 
         try {
           const response = await fetch(`${API_URL}/scan`, {
             method: "POST",
-
-            headers: {
-              "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify({
-              url: url,
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
           });
 
-          console.log("POST /scan status:", response.status);
-
-          const data = await response.json();
-
-          console.log("POST /scan RESPONSE:", data);
-
+          const data = await response.json().catch(() => ({}));
           if (!response.ok) {
-            throw new Error(data.detail || "Scan failed.");
+            const detail =
+              typeof data.detail === "string"
+                ? data.detail
+                : JSON.stringify(data.detail);
+            throw new Error(detail || "Scan failed.");
           }
 
           displayScanResult(data);
-
           showStatus("Scan completed successfully.", "success");
-
           await loadScanHistory();
         } catch (error) {
           console.error("SCAN ERROR:", error);
-
-          showStatus("Scan failed: " + error.message, "error");
+          const offline = error instanceof TypeError;
+          showStatus(
+            offline
+              ? `Cannot reach the API at ${API_URL}. Check that the backend is running and CORS is enabled.`
+              : "Scan failed: " + error.message,
+            "error",
+          );
         } finally {
           scanButton.disabled = false;
-
-          scanButton.textContent = "Run QA Scan";
+          scanButton.classList.remove("loading");
+          setText("scanLabel", "Run QA scan");
         }
       }
 
       async function loadScanHistory() {
+        const tbody = $("historyTableBody");
         try {
           const response = await fetch(`${API_URL}/scans`);
-
-          if (!response.ok) {
-            throw new Error("Could not load scan history.");
-          }
-
+          if (!response.ok) throw new Error("Could not load scan history.");
           const data = await response.json();
 
-          const tbody = document.getElementById("historyTableBody");
-
+          setApiState(true);
           tbody.innerHTML = "";
 
           if (!data.scans || !data.scans.length) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="empty">
-                        No scans found.
-                    </td>
-                </tr>
-            `;
-
+            tbody.innerHTML = `<tr><td colspan="6" class="empty">No scans yet. Run your first scan above.</td></tr>`;
             return;
           }
 
           data.scans.forEach((scan) => {
-            const row = document.createElement("tr");
-
             const status = Number(scan.status_code);
-
-            const statusText =
-              status >= 200 && status < 400 ? "Healthy" : String(status);
-
-            const issueCount = Number(scan.issue_count ?? 0);
-
+            const healthy = status >= 200 && status < 400;
+            const row = document.createElement("tr");
             row.innerHTML = `
-                <td>
-                    #${scan.id}
-                </td>
-
-                <td>
-                    ${escapeHtml(scan.website_url)}
-                </td>
-
-                <td>
-                    <span class="table-status">
-                        ${statusText}
-                    </span>
-                </td>
-
-                <td>
-                    ${issueCount}
-                </td>
-
-                <td>
-                    ${escapeHtml(scan.page_title || "-")}
-                </td>
-
-                <td>
-                    ${formatDate(scan.scan_time)}
-                </td>
-            `;
-
+        <td>#${escapeHtml(scan.id)}</td>
+        <td title="${escapeHtml(scan.website_url)}">${escapeHtml(scan.website_url)}</td>
+        <td><span class="pill ${healthy ? "ok" : "bad"}">${healthy ? "Healthy" : escapeHtml(scan.status_code ?? "Error")}</span></td>
+        <td>${Number(scan.issue_count ?? 0)}</td>
+        <td>${escapeHtml(scan.page_title || "-")}</td>
+        <td>${formatDate(scan.scan_time)}</td>`;
             tbody.appendChild(row);
           });
         } catch (error) {
           console.error("HISTORY ERROR:", error);
-
-          document.getElementById("historyTableBody").innerHTML = `
-            <tr>
-                <td
-                    colspan="6"
-                    class="empty"
-                >
-                    Failed to load scan history.
-                </td>
-            </tr>
-        `;
+          setApiState(false);
+          tbody.innerHTML = `<tr><td colspan="6" class="empty">Failed to load scan history. Is the backend running?</td></tr>`;
         }
       }
 
-      function formatDate(dateValue) {
-        if (!dateValue) {
-          return "-";
-        }
-
-        const date = new Date(dateValue);
-
-        if (Number.isNaN(date.getTime())) {
-          return String(dateValue);
-        }
-
-        return date.toLocaleString();
+      function setApiState(online) {
+        $("apiDot").className = "dot " + (online ? "on" : "off");
+        setText("apiText", online ? "API connected" : "API offline");
       }
 
-      scanButton.addEventListener("click", function (event) {
-        event.preventDefault();
-
+      /* ---------- events ---------- */
+      scanButton.addEventListener("click", (e) => {
+        e.preventDefault();
         scanWebsite();
       });
 
-      urlInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-
+      urlInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
           scanWebsite();
         }
       });
 
-      document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".nav a").forEach((link) => {
+        link.addEventListener("click", () => {
+          document
+            .querySelectorAll(".nav a")
+            .forEach((a) => a.classList.remove("active"));
+          link.classList.add("active");
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateScore(100);
+        setText("scoreTitle", "Run a scan to begin");
+        setText(
+          "scoreDescription",
+          "Your score appears here after the first scan.",
+        );
         loadScanHistory();
       });
     </script>
