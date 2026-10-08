@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 from datetime import datetime
 from urllib.parse import urljoin
@@ -9,9 +10,16 @@ from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
 
-# Load database settings from .env
+# ============================================================
+# LOAD ENVIRONMENT VARIABLES
+# ============================================================
+
 load_dotenv()
 
+
+# ============================================================
+# DATABASE CONFIGURATION
+# ============================================================
 
 DB_CONFIG = {
     "host": os.getenv("DB_HOST"),
@@ -21,11 +29,24 @@ DB_CONFIG = {
 }
 
 
+# ============================================================
+# DATABASE CONNECTION
+# ============================================================
+
 def get_connection():
+
     return psycopg.connect(**DB_CONFIG)
 
 
-def save_scan(url, status_code, page_title):
+# ============================================================
+# SAVE SCAN
+# ============================================================
+
+def save_scan(
+    url,
+    status_code,
+    page_title
+):
 
     conn = get_connection()
 
@@ -62,6 +83,10 @@ def save_scan(url, status_code, page_title):
         cursor.close()
         conn.close()
 
+
+# ============================================================
+# SAVE ISSUE
+# ============================================================
 
 def save_issue(
     scan_id,
@@ -109,6 +134,10 @@ def save_issue(
         conn.close()
 
 
+# ============================================================
+# ADD ISSUE
+# ============================================================
+
 def add_issue(
     issues,
     scan_id,
@@ -149,7 +178,15 @@ def add_issue(
             )
 
 
-def check_links(page, scan_id, issues):
+# ============================================================
+# CHECK LINKS
+# ============================================================
+
+def check_links(
+    page,
+    scan_id,
+    issues
+):
 
     print("\n" + "=" * 65)
     print("                         LINK CHECK")
@@ -158,6 +195,7 @@ def check_links(page, scan_id, issues):
     links = page.locator("a").all()
 
     total_links = len(links)
+
     working_links = 0
     broken_links = 0
     skipped_links = 0
@@ -177,6 +215,7 @@ def check_links(page, scan_id, issues):
             if not href:
 
                 skipped_links += 1
+
                 continue
 
             href = href.strip()
@@ -190,6 +229,7 @@ def check_links(page, scan_id, issues):
             ):
 
                 skipped_links += 1
+
                 continue
 
             full_url = urljoin(
@@ -202,6 +242,7 @@ def check_links(page, scan_id, issues):
             ):
 
                 skipped_links += 1
+
                 continue
 
             if full_url in checked_urls:
@@ -314,8 +355,7 @@ def check_links(page, scan_id, issues):
                 "BROKEN_LINK",
                 None,
                 None,
-                f"Could not process link: "
-                f"{str(error)[:200]}",
+                f"Could not process link: {str(error)[:200]}",
                 "HIGH"
             )
 
@@ -345,7 +385,15 @@ def check_links(page, scan_id, issues):
     }
 
 
-def check_images(page, scan_id, issues):
+# ============================================================
+# CHECK IMAGES
+# ============================================================
+
+def check_images(
+    page,
+    scan_id,
+    issues
+):
 
     print("\n" + "=" * 65)
     print("                         IMAGE CHECK")
@@ -354,6 +402,7 @@ def check_images(page, scan_id, issues):
     images = page.locator("img").all()
 
     total_images = len(images)
+
     working_images = 0
     broken_images = 0
     skipped_images = 0
@@ -528,8 +577,7 @@ def check_images(page, scan_id, issues):
                 "BROKEN_IMAGE",
                 None,
                 None,
-                f"Could not process image: "
-                f"{str(error)[:200]}",
+                f"Could not process image: {str(error)[:200]}",
                 "MEDIUM"
             )
 
@@ -558,6 +606,10 @@ def check_images(page, scan_id, issues):
         "skipped": skipped_images
     }
 
+
+# ============================================================
+# CHECK JAVASCRIPT
+# ============================================================
 
 def check_javascript(
     console_errors,
@@ -608,6 +660,137 @@ def check_javascript(
     }
 
 
+# ============================================================
+# PAGE PERFORMANCE ANALYSIS
+# ============================================================
+
+def analyze_performance(page):
+
+    print("\n" + "=" * 65)
+    print("                    PAGE PERFORMANCE")
+    print("=" * 65)
+
+    performance = {
+        "load_time_ms": 0,
+        "total_resources": 0,
+        "images": 0,
+        "javascript": 0,
+        "css": 0
+    }
+
+    try:
+
+        performance_data = page.evaluate(
+            """
+            () => {
+
+                const resources =
+                    performance.getEntriesByType("resource");
+
+                let images = 0;
+                let javascript = 0;
+                let css = 0;
+
+                resources.forEach(resource => {
+
+                    const name =
+                        resource.name.toLowerCase();
+
+                    const type =
+                        resource.initiatorType;
+
+                    if (
+                        type === "img" ||
+                        /\\.(png|jpg|jpeg|gif|webp|svg|ico)(\\?|$)/i.test(name)
+                    ) {
+
+                        images++;
+
+                    } else if (
+                        type === "script" ||
+                        /\\.js(\\?|$)/i.test(name)
+                    ) {
+
+                        javascript++;
+
+                    } else if (
+                        type === "link" ||
+                        type === "css" ||
+                        /\\.css(\\?|$)/i.test(name)
+                    ) {
+
+                        css++;
+
+                    }
+
+                });
+
+                const navigation =
+                    performance.getEntriesByType("navigation")[0];
+
+                let loadTime = 0;
+
+                if (navigation) {
+
+                    loadTime =
+                        navigation.loadEventEnd -
+                        navigation.startTime;
+
+                }
+
+                return {
+                    load_time_ms: Math.round(loadTime),
+                    total_resources: resources.length,
+                    images: images,
+                    javascript: javascript,
+                    css: css
+                };
+            }
+            """
+        )
+
+        performance.update(
+            performance_data
+        )
+
+    except Exception as error:
+
+        print(
+            f"Performance analysis error: {error}"
+        )
+
+    print(
+        f"Load Time       : "
+        f"{performance['load_time_ms']} ms"
+    )
+
+    print(
+        f"Total Resources : "
+        f"{performance['total_resources']}"
+    )
+
+    print(
+        f"Images          : "
+        f"{performance['images']}"
+    )
+
+    print(
+        f"JavaScript      : "
+        f"{performance['javascript']}"
+    )
+
+    print(
+        f"CSS             : "
+        f"{performance['css']}"
+    )
+
+    return performance
+
+
+# ============================================================
+# RUN QA SCAN
+# ============================================================
+
 def run_qa_scan(url):
 
     print("=" * 65)
@@ -619,6 +802,7 @@ def run_qa_scan(url):
     )
 
     issues = []
+
     console_errors = []
 
     status_code = None
@@ -644,6 +828,14 @@ def run_qa_scan(url):
         "errors": []
     }
 
+    performance_report = {
+        "load_time_ms": 0,
+        "total_resources": 0,
+        "images": 0,
+        "javascript": 0,
+        "css": 0
+    }
+
     with sync_playwright() as playwright:
 
         browser = playwright.chromium.launch(
@@ -655,6 +847,7 @@ def run_qa_scan(url):
         def handle_console(message):
 
             if message.type != "error":
+
                 return
 
             message_text = message.text
@@ -663,6 +856,7 @@ def run_qa_scan(url):
             if message_text.startswith(
                 "Failed to load resource:"
             ):
+
                 return
 
             console_errors.append(
@@ -687,10 +881,17 @@ def run_qa_scan(url):
 
         try:
 
+            start_time = time.perf_counter()
+
             response = page.goto(
                 url,
                 wait_until="networkidle",
                 timeout=60000
+            )
+
+            navigation_time = (
+                time.perf_counter() -
+                start_time
             )
 
             if response:
@@ -705,6 +906,11 @@ def run_qa_scan(url):
 
             print(
                 f"Page Title  : {page_title}"
+            )
+
+            print(
+                f"Navigation Time : "
+                f"{round(navigation_time * 1000)} ms"
             )
 
         except Exception as error:
@@ -754,6 +960,10 @@ def run_qa_scan(url):
             scan_id,
             issues,
             url
+        )
+
+        performance_report = analyze_performance(
+            page
         )
 
         try:
@@ -811,11 +1021,42 @@ def run_qa_scan(url):
         f"Broken Images  : {image_report['broken']}"
     )
 
+    print(
+        f"Skipped Images : {image_report['skipped']}"
+    )
+
     print("\nJAVASCRIPT")
 
     print(
         f"Console Errors : "
         f"{javascript_report['console_errors']}"
+    )
+
+    print("\nPERFORMANCE")
+
+    print(
+        f"Load Time       : "
+        f"{performance_report['load_time_ms']} ms"
+    )
+
+    print(
+        f"Total Resources : "
+        f"{performance_report['total_resources']}"
+    )
+
+    print(
+        f"Images          : "
+        f"{performance_report['images']}"
+    )
+
+    print(
+        f"JavaScript      : "
+        f"{performance_report['javascript']}"
+    )
+
+    print(
+        f"CSS             : "
+        f"{performance_report['css']}"
     )
 
     print("\nISSUES")
@@ -839,6 +1080,8 @@ def run_qa_scan(url):
         "images": image_report,
 
         "javascript": javascript_report,
+
+        "performance": performance_report,
 
         "issues": issues
     }
@@ -865,6 +1108,10 @@ def run_qa_scan(url):
 
     return report
 
+
+# ============================================================
+# MAIN
+# ============================================================
 
 if __name__ == "__main__":
 
