@@ -6,3 +6,4 @@ report.json
 .env
 *.log
 qa_test_backup.py
+test-site/

@@ -134,8 +134,8 @@ def add_issue(
         except Exception as error:
             print(f"Could not save issue: {error}")
 
-
 def check_links(page, scan_id, issues):
+
     print("\n" + "=" * 65)
     print("                         LINK CHECK")
     print("=" * 65)
@@ -154,36 +154,43 @@ def check_links(page, scan_id, issues):
     for link in links:
 
         try:
+
             href = link.get_attribute("href")
 
+            # Ignore links without href
             if not href:
                 skipped_links += 1
                 continue
 
             href = href.strip()
 
+            # Ignore special links
             if (
                 href.startswith("#")
-                or href.startswith("mailto:")
-                or href.startswith("tel:")
-                or href.startswith("javascript:")
-                or href.startswith("data:")
+                or href.lower().startswith("mailto:")
+                or href.lower().startswith("tel:")
+                or href.lower().startswith("javascript:")
+                or href.lower().startswith("data:")
             ):
                 skipped_links += 1
                 continue
 
+            # Convert relative URL to absolute URL
             full_url = urljoin(page.url, href)
 
+            # Only check HTTP/HTTPS URLs
             if not full_url.startswith(("http://", "https://")):
                 skipped_links += 1
                 continue
 
+            # Avoid checking duplicate URLs
             if full_url in checked_urls:
                 continue
 
             checked_urls.add(full_url)
 
             try:
+
                 response = page.request.get(
                     full_url,
                     timeout=15000
@@ -191,23 +198,89 @@ def check_links(page, scan_id, issues):
 
                 status = response.status
 
-            except Exception:
-                status = 0
+                # -----------------------------------------
+                # WORKING LINK
+                # -----------------------------------------
 
-            if 200 <= status < 400:
+                if 200 <= status < 400:
 
-                working_links += 1
+                    working_links += 1
 
-                print(
-                    f"OK {status} - {full_url}"
-                )
+                    if 300 <= status < 400:
 
-            else:
+                        print(
+                            f"REDIRECT {status} - {full_url}"
+                        )
+
+                    else:
+
+                        print(
+                            f"OK {status} - {full_url}"
+                        )
+
+                # -----------------------------------------
+                # BROKEN HTTP LINK
+                # -----------------------------------------
+
+                else:
+
+                    broken_links += 1
+
+                    print(
+                        f"BROKEN {status} - {full_url}"
+                    )
+
+                    add_issue(
+                        issues,
+                        scan_id,
+                        "BROKEN_LINK",
+                        full_url,
+                        status,
+                        f"Link returned HTTP {status}",
+                        "HIGH"
+                    )
+
+            # -----------------------------------------
+            # REQUEST ERROR
+            # -----------------------------------------
+
+            except Exception as error:
 
                 broken_links += 1
 
+                error_message = str(error)
+
+                # Detect timeout
+                if (
+                    "Timeout" in error_message
+                    or "timeout" in error_message.lower()
+                ):
+
+                    message = "Link request timed out"
+
+                # Detect connection / DNS problems
+                elif (
+                    "ERR_NAME_NOT_RESOLVED" in error_message
+                    or "ENOTFOUND" in error_message
+                    or "ECONNREFUSED" in error_message
+                    or "connection" in error_message.lower()
+                ):
+
+                    message = "Could not connect to the link"
+
+                else:
+
+                    message = (
+                        f"Link request failed: "
+                        f"{error_message[:200]}"
+                    )
+
                 print(
-                    f"BROKEN {status} - {full_url}"
+                    f"BROKEN ERROR - {full_url}"
+                )
+
+                print(
+                    f"Reason: {message}"
                 )
 
                 add_issue(
@@ -215,8 +288,8 @@ def check_links(page, scan_id, issues):
                     scan_id,
                     "BROKEN_LINK",
                     full_url,
-                    status,
-                    "Broken link detected",
+                    None,
+                    message,
                     "HIGH"
                 )
 
@@ -225,8 +298,36 @@ def check_links(page, scan_id, issues):
             broken_links += 1
 
             print(
-                f"Link check error: {error}"
+                f"Link processing error: {error}"
             )
+
+            add_issue(
+                issues,
+                scan_id,
+                "BROKEN_LINK",
+                None,
+                None,
+                f"Could not process link: {str(error)[:200]}",
+                "HIGH"
+            )
+
+    print("\n" + "-" * 65)
+
+    print(
+        f"Links checked : {len(checked_urls)}"
+    )
+
+    print(
+        f"Working links : {working_links}"
+    )
+
+    print(
+        f"Broken links  : {broken_links}"
+    )
+
+    print(
+        f"Skipped links : {skipped_links}"
+    )
 
     return {
         "total": total_links,
