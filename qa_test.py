@@ -1,1120 +1,393 @@
-import json
-import os
-import time
+"""
+qa_test.py – FastAPI application and API endpoints for QA Sentinel.
 
-from datetime import datetime
-from urllib.parse import urljoin
+DB_CONFIG and get_connection() are imported from api.py (single source of
+truth).  This file contains only routing, request/response logic, and
+application setup.
+"""
 
-import psycopg
-from dotenv import load_dotenv
-from playwright.sync_api import sync_playwright
+from contextlib import asynccontextmanager
+from pathlib import Path
 
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
-# ============================================================
-# LOAD ENVIRONMENT VARIABLES
-# ============================================================
+# DB_CONFIG and get_connection come from api.py — not duplicated here.
+from api import (
+    ensure_tables,
+    get_connection,
+    run_qa_scan,
+    save_scan,
+)
 
-load_dotenv()
-
-
-# ============================================================
-# DATABASE CONFIGURATION
-# ============================================================
-
-DB_CONFIG = {
-    "host": os.getenv("DB_HOST"),
-    "dbname": os.getenv("DB_NAME"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD"),
-}
+BASE_DIR = Path(__file__).resolve().parent
 
 
-# ============================================================
-# DATABASE CONNECTION
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────────────
+# Lifespan  (replaces the deprecated @app.on_event("startup"))
+# ──────────────────────────────────────────────────────────────────────────────
 
-def get_connection():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Verify/create DB tables at startup.  No special shutdown needed."""
+    try:
+        ensure_tables()
+        print("[startup] Database schema verified.")
+    except Exception as exc:
+        print(f"[startup warning] Could not verify database schema: {exc}")
+    yield  # application runs here
 
-    return psycopg.connect(**DB_CONFIG)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# App
+# ──────────────────────────────────────────────────────────────────────────────
+
+app = FastAPI(
+    title="Smart Website QA Agent",
+    description=(
+        "Automated website quality scanning: broken links, broken images, "
+        "JavaScript errors, performance, and health scoring."
+    ),
+    version="3.1.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],      # Restrict to your domain in production
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-# ============================================================
-# SAVE SCAN
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────────────
+# Request models
+# ──────────────────────────────────────────────────────────────────────────────
 
-def save_scan(
-    url,
-    status_code,
-    page_title
-):
+class ScanRequest(BaseModel):
+    url: str
 
-    conn = get_connection()
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Static assets
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.get("/favicon.svg", include_in_schema=False)
+def favicon():
+    f = BASE_DIR / "favicon.svg"
+    if f.is_file():
+        return FileResponse(f, media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="favicon.svg not found")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Core endpoints
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.get("/", summary="API root")
+def home():
+    return {
+        "status":    "running",
+        "version":   "3.1.0",
+        "dashboard": "/dashboard",
+        "docs":      "/docs",
+    }
+
+
+@app.get("/health", summary="Health check (tests DB connection)")
+def health():
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1")
+        return {"api": "ok", "database": "connected"}
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database unavailable: {exc}",
+        ) from exc
+
+
+@app.get("/dashboard", summary="Serve the QA Sentinel dashboard")
+def dashboard():
+    index_file = BASE_DIR / "index.html"
+    if not index_file.is_file():
+        raise HTTPException(status_code=404, detail="index.html not found")
+    return FileResponse(index_file, media_type="text/html")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Scan  (POST)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.post("/scan", summary="Run a full QA scan on a website")
+def scan_website(request: ScanRequest):
+    """
+    Accepts a URL, runs the full Playwright-based QA scan, persists results
+    to PostgreSQL, and returns the complete report.
+
+    Returns HTTP 400 for invalid or blocked URLs.
+    Returns HTTP 500 if the scan itself fails.
+    """
+    url = request.url.strip()
+
+    if not url:
+        raise HTTPException(status_code=400, detail="Please enter a website URL.")
+
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
 
     try:
-
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO scans
-            (
-                website_url,
-                status_code,
-                page_title
-            )
-            VALUES (%s, %s, %s)
-            RETURNING id
-            """,
-            (
-                url,
-                status_code,
-                page_title
-            )
-        )
-
-        scan_id = cursor.fetchone()[0]
-
-        conn.commit()
-
-        return scan_id
-
-    finally:
-
-        cursor.close()
-        conn.close()
-
-
-# ============================================================
-# SAVE ISSUE
-# ============================================================
-
-def save_issue(
-    scan_id,
-    issue_type,
-    issue_url,
-    status_code,
-    message,
-    severity
-):
-
-    conn = get_connection()
-
-    try:
-
-        cursor = conn.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO issues
-            (
-                scan_id,
-                issue_type,
-                issue_url,
-                status_code,
-                message,
-                severity
-            )
-            VALUES (%s, %s, %s, %s, %s, %s)
-            """,
-            (
-                scan_id,
-                issue_type,
-                issue_url,
-                status_code,
-                message,
-                severity
-            )
-        )
-
-        conn.commit()
-
-    finally:
-
-        cursor.close()
-        conn.close()
-
-
-# ============================================================
-# ADD ISSUE
-# ============================================================
-
-def add_issue(
-    issues,
-    scan_id,
-    issue_type,
-    issue_url,
-    status_code,
-    message,
-    severity
-):
-
-    issue = {
-        "issue_type": issue_type,
-        "issue_url": issue_url,
-        "status_code": status_code,
-        "message": message,
-        "severity": severity
-    }
-
-    issues.append(issue)
-
-    if scan_id:
-
-        try:
-
-            save_issue(
-                scan_id,
-                issue_type,
-                issue_url,
-                status_code,
-                message,
-                severity
-            )
-
-        except Exception as error:
-
-            print(
-                f"Could not save issue: {error}"
-            )
-
-
-# ============================================================
-# CHECK LINKS
-# ============================================================
-
-def check_links(
-    page,
-    scan_id,
-    issues
-):
-
-    print("\n" + "=" * 65)
-    print("                         LINK CHECK")
-    print("=" * 65)
-
-    links = page.locator("a").all()
-
-    total_links = len(links)
-
-    working_links = 0
-    broken_links = 0
-    skipped_links = 0
-
-    checked_urls = set()
-
-    print(
-        f"Total links found: {total_links}\n"
-    )
-
-    for link in links:
-
-        try:
-
-            href = link.get_attribute("href")
-
-            if not href:
-
-                skipped_links += 1
-
-                continue
-
-            href = href.strip()
-
-            if (
-                href.startswith("#")
-                or href.lower().startswith("mailto:")
-                or href.lower().startswith("tel:")
-                or href.lower().startswith("javascript:")
-                or href.lower().startswith("data:")
-            ):
-
-                skipped_links += 1
-
-                continue
-
-            full_url = urljoin(
-                page.url,
-                href
-            )
-
-            if not full_url.startswith(
-                ("http://", "https://")
-            ):
-
-                skipped_links += 1
-
-                continue
-
-            if full_url in checked_urls:
-
-                continue
-
-            checked_urls.add(full_url)
-
-            try:
-
-                response = page.request.get(
-                    full_url,
-                    timeout=15000
-                )
-
-                status = response.status
-
-                if 200 <= status < 400:
-
-                    working_links += 1
-
-                    if 300 <= status < 400:
-
-                        print(
-                            f"REDIRECT {status} - {full_url}"
-                        )
-
-                    else:
-
-                        print(
-                            f"OK {status} - {full_url}"
-                        )
-
-                else:
-
-                    broken_links += 1
-
-                    print(
-                        f"BROKEN {status} - {full_url}"
-                    )
-
-                    add_issue(
-                        issues,
-                        scan_id,
-                        "BROKEN_LINK",
-                        full_url,
-                        status,
-                        f"Link returned HTTP {status}",
-                        "HIGH"
-                    )
-
-            except Exception as error:
-
-                broken_links += 1
-
-                error_message = str(error)
-
-                if (
-                    "Timeout" in error_message
-                    or "timeout" in error_message.lower()
-                ):
-
-                    message = "Link request timed out"
-
-                elif (
-                    "ERR_NAME_NOT_RESOLVED" in error_message
-                    or "ENOTFOUND" in error_message
-                    or "ECONNREFUSED" in error_message
-                    or "connection" in error_message.lower()
-                ):
-
-                    message = "Could not connect to the link"
-
-                else:
-
-                    message = (
-                        f"Link request failed: "
-                        f"{error_message[:200]}"
-                    )
-
-                print(
-                    f"BROKEN ERROR - {full_url}"
-                )
-
-                print(
-                    f"Reason: {message}"
-                )
-
-                add_issue(
-                    issues,
-                    scan_id,
-                    "BROKEN_LINK",
-                    full_url,
-                    None,
-                    message,
-                    "HIGH"
-                )
-
-        except Exception as error:
-
-            broken_links += 1
-
-            print(
-                f"Link processing error: {error}"
-            )
-
-            add_issue(
-                issues,
-                scan_id,
-                "BROKEN_LINK",
-                None,
-                None,
-                f"Could not process link: {str(error)[:200]}",
-                "HIGH"
-            )
-
-    print("\n" + "-" * 65)
-
-    print(
-        f"Links checked : {len(checked_urls)}"
-    )
-
-    print(
-        f"Working links : {working_links}"
-    )
-
-    print(
-        f"Broken links  : {broken_links}"
-    )
-
-    print(
-        f"Skipped links : {skipped_links}"
-    )
-
-    return {
-        "total": total_links,
-        "working": working_links,
-        "broken": broken_links,
-        "skipped": skipped_links
-    }
-
-
-# ============================================================
-# CHECK IMAGES
-# ============================================================
-
-def check_images(
-    page,
-    scan_id,
-    issues
-):
-
-    print("\n" + "=" * 65)
-    print("                         IMAGE CHECK")
-    print("=" * 65)
-
-    images = page.locator("img").all()
-
-    total_images = len(images)
-
-    working_images = 0
-    broken_images = 0
-    skipped_images = 0
-
-    checked_urls = set()
-
-    print(
-        f"Total images found: {total_images}\n"
-    )
-
-    for image in images:
-
-        try:
-
-            src = image.get_attribute("src")
-
-            if not src:
-
-                skipped_images += 1
-
-                print(
-                    "SKIPPED - Image has no src attribute"
-                )
-
-                continue
-
-            src = src.strip()
-
-            if (
-                src.lower().startswith("data:")
-                or src.lower().startswith("blob:")
-            ):
-
-                skipped_images += 1
-
-                print(
-                    f"SKIPPED - Non-HTTP image source: "
-                    f"{src[:100]}"
-                )
-
-                continue
-
-            full_image_url = urljoin(
-                page.url,
-                src
-            )
-
-            if not full_image_url.startswith(
-                ("http://", "https://")
-            ):
-
-                skipped_images += 1
-
-                print(
-                    f"SKIPPED - Unsupported image URL: "
-                    f"{full_image_url}"
-                )
-
-                continue
-
-            if full_image_url in checked_urls:
-
-                continue
-
-            checked_urls.add(full_image_url)
-
-            try:
-
-                response = page.request.get(
-                    full_image_url,
-                    timeout=15000
-                )
-
-                status = response.status
-
-                if 200 <= status < 400:
-
-                    working_images += 1
-
-                    if 300 <= status < 400:
-
-                        print(
-                            f"REDIRECT {status} - "
-                            f"{full_image_url}"
-                        )
-
-                    else:
-
-                        print(
-                            f"OK {status} - "
-                            f"{full_image_url}"
-                        )
-
-                else:
-
-                    broken_images += 1
-
-                    print(
-                        f"BROKEN {status} - "
-                        f"{full_image_url}"
-                    )
-
-                    add_issue(
-                        issues,
-                        scan_id,
-                        "BROKEN_IMAGE",
-                        full_image_url,
-                        status,
-                        f"Image returned HTTP {status}",
-                        "MEDIUM"
-                    )
-
-            except Exception as error:
-
-                broken_images += 1
-
-                error_message = str(error)
-
-                if (
-                    "Timeout" in error_message
-                    or "timeout" in error_message.lower()
-                ):
-
-                    message = "Image request timed out"
-
-                elif (
-                    "ERR_NAME_NOT_RESOLVED" in error_message
-                    or "ENOTFOUND" in error_message
-                    or "ECONNREFUSED" in error_message
-                    or "connection" in error_message.lower()
-                ):
-
-                    message = "Could not connect to the image"
-
-                else:
-
-                    message = (
-                        f"Image request failed: "
-                        f"{error_message[:200]}"
-                    )
-
-                print(
-                    f"BROKEN ERROR - "
-                    f"{full_image_url}"
-                )
-
-                print(
-                    f"Reason: {message}"
-                )
-
-                add_issue(
-                    issues,
-                    scan_id,
-                    "BROKEN_IMAGE",
-                    full_image_url,
-                    None,
-                    message,
-                    "MEDIUM"
-                )
-
-        except Exception as error:
-
-            broken_images += 1
-
-            print(
-                f"Image processing error: {error}"
-            )
-
-            add_issue(
-                issues,
-                scan_id,
-                "BROKEN_IMAGE",
-                None,
-                None,
-                f"Could not process image: {str(error)[:200]}",
-                "MEDIUM"
-            )
-
-    print("\n" + "-" * 65)
-
-    print(
-        f"Images checked : {len(checked_urls)}"
-    )
-
-    print(
-        f"Working images : {working_images}"
-    )
-
-    print(
-        f"Broken images  : {broken_images}"
-    )
-
-    print(
-        f"Skipped images : {skipped_images}"
-    )
-
-    return {
-        "total": total_images,
-        "working": working_images,
-        "broken": broken_images,
-        "skipped": skipped_images
-    }
-
-
-# ============================================================
-# CHECK JAVASCRIPT
-# ============================================================
-
-def check_javascript(
-    console_errors,
-    scan_id,
-    issues,
-    url
-):
-
-    print("\n" + "=" * 65)
-    print("                    JAVASCRIPT CHECK")
-    print("=" * 65)
-
-    if not console_errors:
-
-        print(
-            "No JavaScript console errors detected"
-        )
-
+        report = run_qa_scan(url)
         return {
-            "console_errors": 0,
-            "errors": []
+            "status":  "success",
+            "url":     url,
+            "scan_id": report.get("scan", {}).get("scan_id"),
+            "message": "QA scan completed successfully.",
+            "report":  report,
         }
 
-    print(
-        f"{len(console_errors)} "
-        "JavaScript console errors detected"
-    )
+    except ValueError as exc:
+        # normalize_url raises ValueError for invalid or SSRF-blocked URLs
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    for error in console_errors:
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
 
-        print(
-            f"ERROR: {error}"
-        )
+        # Record the failure in the database so history stays accurate
+        try:
+            save_scan(
+                url, None, "",
+                status="failed",
+                error_message=str(exc)[:500],
+            )
+        except Exception as db_error:
+            print(f"[scan] Could not save failed scan: {db_error}")
 
-        add_issue(
-            issues,
-            scan_id,
-            "JAVASCRIPT_ERROR",
-            url,
-            None,
-            error,
-            "HIGH"
-        )
-
-    return {
-        "console_errors": len(console_errors),
-        "errors": console_errors
-    }
+        raise HTTPException(
+            status_code=500,
+            detail=f"QA scan failed: {exc}",
+        ) from exc
 
 
-# ============================================================
-# PAGE PERFORMANCE ANALYSIS
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────────────
+# Scan history  (GET list)
+# ──────────────────────────────────────────────────────────────────────────────
 
-def analyze_performance(page):
-
-    print("\n" + "=" * 65)
-    print("                    PAGE PERFORMANCE")
-    print("=" * 65)
-
-    performance = {
-        "load_time_ms": 0,
-        "total_resources": 0,
-        "images": 0,
-        "javascript": 0,
-        "css": 0
-    }
-
+@app.get("/scans", summary="List recent scans (most recent first)")
+def get_scans():
+    """
+    Returns up to 100 most recent scans with issue counts and health scores.
+    Used by the dashboard scan-history table.
+    """
     try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        s.id,
+                        s.website_url,
+                        s.status_code,
+                        s.page_title,
+                        s.health_score,
+                        s.scan_time,
+                        s.finished_at,
+                        s.status,
+                        s.error_message,
+                        COUNT(i.id) AS issue_count
+                    FROM scans s
+                    LEFT JOIN issues i ON i.scan_id = s.id
+                    GROUP BY
+                        s.id, s.website_url, s.status_code, s.page_title,
+                        s.health_score, s.scan_time, s.finished_at,
+                        s.status, s.error_message
+                    ORDER BY s.id DESC
+                    LIMIT 100
+                """)
+                rows = cur.fetchall()
 
-        performance_data = page.evaluate(
-            """
-            () => {
-
-                const resources =
-                    performance.getEntriesByType("resource");
-
-                let images = 0;
-                let javascript = 0;
-                let css = 0;
-
-                resources.forEach(resource => {
-
-                    const name =
-                        resource.name.toLowerCase();
-
-                    const type =
-                        resource.initiatorType;
-
-                    if (
-                        type === "img" ||
-                        /\\.(png|jpg|jpeg|gif|webp|svg|ico)(\\?|$)/i.test(name)
-                    ) {
-
-                        images++;
-
-                    } else if (
-                        type === "script" ||
-                        /\\.js(\\?|$)/i.test(name)
-                    ) {
-
-                        javascript++;
-
-                    } else if (
-                        type === "link" ||
-                        type === "css" ||
-                        /\\.css(\\?|$)/i.test(name)
-                    ) {
-
-                        css++;
-
-                    }
-
-                });
-
-                const navigation =
-                    performance.getEntriesByType("navigation")[0];
-
-                let loadTime = 0;
-
-                if (navigation) {
-
-                    loadTime =
-                        navigation.loadEventEnd -
-                        navigation.startTime;
-
-                }
-
-                return {
-                    load_time_ms: Math.round(loadTime),
-                    total_resources: resources.length,
-                    images: images,
-                    javascript: javascript,
-                    css: css
-                };
+        scans = [
+            {
+                "id":            row[0],
+                "website_url":   row[1],
+                "status_code":   row[2],
+                "page_title":    row[3],
+                "health_score":  row[4],
+                "scan_time":     row[5].isoformat() if row[5] else None,
+                "finished_at":   row[6].isoformat() if row[6] else None,
+                "status":        row[7],
+                "error_message": row[8],
+                "issue_count":   row[9],
             }
-            """
-        )
+            for row in rows
+        ]
 
-        performance.update(
-            performance_data
-        )
+        return {"total": len(scans), "scans": scans}
 
-    except Exception as error:
-
-        print(
-            f"Performance analysis error: {error}"
-        )
-
-    print(
-        f"Load Time       : "
-        f"{performance['load_time_ms']} ms"
-    )
-
-    print(
-        f"Total Resources : "
-        f"{performance['total_resources']}"
-    )
-
-    print(
-        f"Images          : "
-        f"{performance['images']}"
-    )
-
-    print(
-        f"JavaScript      : "
-        f"{performance['javascript']}"
-    )
-
-    print(
-        f"CSS             : "
-        f"{performance['css']}"
-    )
-
-    return performance
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not load scans: {exc}",
+        ) from exc
 
 
-# ============================================================
-# RUN QA SCAN
-# ============================================================
+# ──────────────────────────────────────────────────────────────────────────────
+# Single scan detail  (GET by id)   ← NEW in v3.1
+# ──────────────────────────────────────────────────────────────────────────────
 
-def run_qa_scan(url):
+@app.get("/scan/{scan_id}", summary="Get full details for a single scan")
+def get_scan(scan_id: int):
+    """
+    Returns the scan metadata, the stored full-report JSON (if available),
+    and all issues recorded for that scan.
 
-    print("=" * 65)
-    print("                    SMART WEBSITE QA AGENT")
-    print("=" * 65)
+    Use this endpoint to re-display a previous scan on the dashboard without
+    re-running the scan.
+    """
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
 
-    print(
-        f"\nTesting: {url}"
-    )
+                # Scan metadata + stored report
+                cur.execute("""
+                    SELECT
+                        id, website_url, status_code, page_title,
+                        health_score, scan_time, finished_at,
+                        status, error_message, report
+                    FROM scans
+                    WHERE id = %s
+                """, (scan_id,))
+                row = cur.fetchone()
 
-    issues = []
-
-    console_errors = []
-
-    status_code = None
-    page_title = ""
-    scan_id = None
-
-    link_report = {
-        "total": 0,
-        "working": 0,
-        "broken": 0,
-        "skipped": 0
-    }
-
-    image_report = {
-        "total": 0,
-        "working": 0,
-        "broken": 0,
-        "skipped": 0
-    }
-
-    javascript_report = {
-        "console_errors": 0,
-        "errors": []
-    }
-
-    performance_report = {
-        "load_time_ms": 0,
-        "total_resources": 0,
-        "images": 0,
-        "javascript": 0,
-        "css": 0
-    }
-
-    with sync_playwright() as playwright:
-
-        browser = playwright.chromium.launch(
-            headless=True
-        )
-
-        page = browser.new_page()
-
-        def handle_console(message):
-
-            if message.type != "error":
-
-                return
-
-            message_text = message.text
-
-            # Ignore browser resource-loading errors.
-            if message_text.startswith(
-                "Failed to load resource:"
-            ):
-
-                return
-
-            console_errors.append(
-                message_text
+        if not row:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Scan #{scan_id} not found.",
             )
 
-        def handle_page_error(error):
-
-            console_errors.append(
-                f"JavaScript runtime error: {error}"
-            )
-
-        page.on(
-            "console",
-            handle_console
-        )
-
-        page.on(
-            "pageerror",
-            handle_page_error
-        )
-
-        try:
-
-            start_time = time.perf_counter()
-
-            response = page.goto(
-                url,
-                wait_until="networkidle",
-                timeout=60000
-            )
-
-            navigation_time = (
-                time.perf_counter() -
-                start_time
-            )
-
-            if response:
-
-                status_code = response.status
-
-            page_title = page.title()
-
-            print(
-                f"Status Code : {status_code}"
-            )
-
-            print(
-                f"Page Title  : {page_title}"
-            )
-
-            print(
-                f"Navigation Time : "
-                f"{round(navigation_time * 1000)} ms"
-            )
-
-        except Exception as error:
-
-            browser.close()
-
-            raise Exception(
-                f"Website loading failed: {error}"
-            )
-
-        try:
-
-            scan_id = save_scan(
-                url,
-                status_code,
-                page_title
-            )
-
-            print(
-                "\nScan saved to PostgreSQL"
-            )
-
-            print(
-                f"Scan ID: {scan_id}"
-            )
-
-        except Exception as error:
-
-            print(
-                f"\nDatabase error while saving scan: {error}"
-            )
-
-        link_report = check_links(
-            page,
-            scan_id,
-            issues
-        )
-
-        image_report = check_images(
-            page,
-            scan_id,
-            issues
-        )
-
-        javascript_report = check_javascript(
-            console_errors,
-            scan_id,
-            issues,
-            url
-        )
-
-        performance_report = analyze_performance(
-            page
-        )
-
-        try:
-
-            page.screenshot(
-                path="homepage.png",
-                full_page=True
-            )
-
-            print(
-                "\nScreenshot saved: homepage.png"
-            )
-
-        except Exception as error:
-
-            print(
-                f"Screenshot error: {error}"
-            )
-
-        browser.close()
-
-    print("\n" + "=" * 65)
-    print("                         QA SUMMARY")
-    print("=" * 65)
-
-    print("\nLINKS")
-
-    print(
-        f"Total Links   : {link_report['total']}"
-    )
-
-    print(
-        f"Working Links : {link_report['working']}"
-    )
-
-    print(
-        f"Broken Links  : {link_report['broken']}"
-    )
-
-    print(
-        f"Skipped Links : {link_report['skipped']}"
-    )
-
-    print("\nIMAGES")
-
-    print(
-        f"Total Images   : {image_report['total']}"
-    )
-
-    print(
-        f"Working Images : {image_report['working']}"
-    )
-
-    print(
-        f"Broken Images  : {image_report['broken']}"
-    )
-
-    print(
-        f"Skipped Images : {image_report['skipped']}"
-    )
-
-    print("\nJAVASCRIPT")
-
-    print(
-        f"Console Errors : "
-        f"{javascript_report['console_errors']}"
-    )
-
-    print("\nPERFORMANCE")
-
-    print(
-        f"Load Time       : "
-        f"{performance_report['load_time_ms']} ms"
-    )
-
-    print(
-        f"Total Resources : "
-        f"{performance_report['total_resources']}"
-    )
-
-    print(
-        f"Images          : "
-        f"{performance_report['images']}"
-    )
-
-    print(
-        f"JavaScript      : "
-        f"{performance_report['javascript']}"
-    )
-
-    print(
-        f"CSS             : "
-        f"{performance_report['css']}"
-    )
-
-    print("\nISSUES")
-
-    print(
-        f"Total Issues   : {len(issues)}"
-    )
-
-    report = {
-
-        "scan": {
-            "scan_id": scan_id,
-            "url": url,
-            "status_code": status_code,
-            "page_title": page_title,
-            "scan_time": datetime.now().isoformat()
-        },
-
-        "links": link_report,
-
-        "images": image_report,
-
-        "javascript": javascript_report,
-
-        "performance": performance_report,
-
-        "issues": issues
-    }
-
-    with open(
-        "report.json",
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        json.dump(
-            report,
-            file,
-            indent=4
-        )
-
-    print(
-        "\nJSON report saved: report.json"
-    )
-
-    print("\n" + "=" * 65)
-    print("                    QA SCAN COMPLETED")
-    print("=" * 65)
-
-    return report
-
-
-# ============================================================
-# MAIN
-# ============================================================
-
-if __name__ == "__main__":
-
-    test_url = "https://httpbin.org"
-
-    run_qa_scan(test_url)
+        scan_meta = {
+            "id":            row[0],
+            "website_url":   row[1],
+            "status_code":   row[2],
+            "page_title":    row[3],
+            "health_score":  row[4],
+            "scan_time":     row[5].isoformat() if row[5] else None,
+            "finished_at":   row[6].isoformat() if row[6] else None,
+            "status":        row[7],
+            "error_message": row[8],
+        }
+
+        # If the full report JSON is stored, return it directly (fast path)
+        stored_report = row[9]
+        if stored_report and isinstance(stored_report, dict):
+            return {
+                "scan":        scan_meta,
+                "issue_count": len(stored_report.get("issues", [])),
+                "report":      stored_report,
+            }
+
+        # Fall back: reconstruct from issues table rows
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT
+                        id, issue_type, issue_url, status_code,
+                        message, severity, recommendation, created_at
+                    FROM issues
+                    WHERE scan_id = %s
+                    ORDER BY id ASC
+                """, (scan_id,))
+                issue_rows = cur.fetchall()
+
+        issues = [
+            {
+                "id":             r[0],
+                "scan_id":        scan_id,
+                "issue_type":     r[1] or "QA_ISSUE",
+                "issue_url":      r[2],
+                "status_code":    r[3],
+                "message":        r[4] or "",
+                "severity":       r[5] or "LOW",
+                "recommendation": r[6] or "",
+                "created_at":     r[7].isoformat() if r[7] else None,
+            }
+            for r in issue_rows
+        ]
+
+        return {
+            "scan":        scan_meta,
+            "issue_count": len(issues),
+            "issues":      issues,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not load scan #{scan_id}: {exc}",
+        ) from exc
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Issues list  (GET)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@app.get("/issues", summary="List issues (optionally filter by scan_id)")
+def get_issues(scan_id: int | None = None):
+    """
+    Returns issues.  Pass ?scan_id=N to filter to a specific scan.
+    Without a filter, returns the 500 most recent issues across all scans.
+    """
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                if scan_id is None:
+                    cur.execute("""
+                        SELECT
+                            id, scan_id, issue_type, issue_url,
+                            status_code, message, severity,
+                            recommendation, created_at
+                        FROM issues
+                        ORDER BY id DESC
+                        LIMIT 500
+                    """)
+                else:
+                    cur.execute("""
+                        SELECT
+                            id, scan_id, issue_type, issue_url,
+                            status_code, message, severity,
+                            recommendation, created_at
+                        FROM issues
+                        WHERE scan_id = %s
+                        ORDER BY id DESC
+                    """, (scan_id,))
+
+                rows = cur.fetchall()
+
+        issues = [
+            {
+                "id":             row[0],
+                "scan_id":        row[1],
+                "issue_type":     row[2] or "QA_ISSUE",
+                "issue_url":      row[3],
+                "status_code":    row[4],
+                "message":        row[5] or "",
+                "severity":       row[6] or "LOW",
+                "recommendation": row[7] or "",
+                "created_at":     row[8].isoformat() if row[8] else None,
+            }
+            for row in rows
+        ]
+
+        return {"total": len(issues), "issues": issues}
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not load issues: {exc}",
+        ) from exc

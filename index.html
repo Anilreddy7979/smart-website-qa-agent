@@ -8,6 +8,8 @@
 
     <title>QA Sentinel | Smart Website QA</title>
 
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
 
     <link
@@ -18,23 +20,37 @@
     <style>
       * {
         box-sizing: border-box;
+
         margin: 0;
+
         padding: 0;
       }
 
       :root {
         --bg: #080c14;
+
         --panel: #0f1622;
+
         --panel2: #141d2c;
+
         --line: rgba(148, 163, 184, 0.13);
+
         --text: #f1f5f9;
+
         --muted: #8794a8;
+
         --faint: #55627a;
+
         --blue: #38bdf8;
+
         --green: #34d399;
+
         --amber: #fbbf24;
+
         --red: #fb7185;
+
         --violet: #a78bfa;
+
         --score: var(--green);
       }
 
@@ -44,20 +60,25 @@
 
       body {
         min-height: 100vh;
+
         background:
           radial-gradient(
             circle at 12% 0,
+
             rgba(56, 189, 248, 0.09),
             transparent 30%
           ),
           var(--bg);
+
         color: var(--text);
+
         font-family:
           "Plus Jakarta Sans",
           system-ui,
           -apple-system,
           "Segoe UI",
           sans-serif;
+
         line-height: 1.5;
       }
 
@@ -72,114 +93,171 @@
 
       :focus-visible {
         outline: 2px solid var(--blue);
+
         outline-offset: 2px;
       }
 
-      /* layout */
+      /* =========================================================
+
+           LAYOUT
+
+        ========================================================= */
 
       .sidebar {
         position: fixed;
+
         inset: 0 auto 0 0;
+
         width: 240px;
+
         padding: 24px 16px;
+
         background: rgba(8, 12, 20, 0.95);
+
         border-right: 1px solid var(--line);
+
         display: flex;
+
         flex-direction: column;
       }
 
       .brand {
         display: flex;
+
         gap: 12px;
+
         align-items: center;
+
         padding: 4px 10px 26px;
       }
 
       .brand-icon {
         width: 40px;
+
         height: 40px;
+
         border-radius: 11px;
+
         display: grid;
+
         place-items: center;
+
         font-size: 19px;
+
         background: linear-gradient(135deg, #0ea5e9, #6366f1);
       }
 
       .brand h1 {
         font-size: 16px;
+
         font-weight: 800;
       }
 
       .brand span {
         font-size: 11px;
+
         color: var(--muted);
       }
 
       .nav {
         display: flex;
+
         flex-direction: column;
+
         gap: 4px;
       }
 
       .nav a {
         display: flex;
+
         gap: 12px;
+
         align-items: center;
+
         padding: 11px 12px;
+
         border-radius: 10px;
+
         color: var(--muted);
+
         text-decoration: none;
+
         font-size: 14px;
+
         font-weight: 500;
+
         transition: 0.15s;
       }
 
       .nav a:hover,
       .nav a.active {
         background: rgba(56, 189, 248, 0.1);
+
         color: #e0f2fe;
       }
 
       .nav i {
         font-style: normal;
+
         width: 18px;
+
         text-align: center;
       }
 
       .api {
         margin-top: auto;
+
         display: flex;
+
         gap: 9px;
+
         align-items: center;
+
         padding: 12px;
+
         border: 1px solid var(--line);
+
         border-radius: 10px;
+
         font-size: 12px;
+
         color: var(--muted);
       }
 
       .dot {
         width: 8px;
+
         height: 8px;
+
         border-radius: 50%;
+
         background: var(--faint);
+
         flex-shrink: 0;
       }
 
       .dot.on {
         background: var(--green);
+
         box-shadow: 0 0 10px var(--green);
       }
 
       .dot.off {
         background: var(--red);
+
         box-shadow: 0 0 10px var(--red);
       }
 
       .main {
         margin-left: 240px;
+
+        width: calc(100% - 240px);
+
+        max-width: none;
+
+        min-width: 0;
+
         padding: 32px 36px 48px;
-        max-width: 1280px;
       }
 
       .page-head {
@@ -188,22 +266,33 @@
 
       .page-head h2 {
         font-size: 28px;
+
         font-weight: 800;
+
         letter-spacing: -0.6px;
       }
 
       .page-head p {
         color: var(--muted);
+
         font-size: 14px;
+
         margin-top: 4px;
       }
 
-      /* scanner */
+      /* =========================================================
+
+           SCANNER
+
+        ========================================================= */
 
       .scan {
         padding: 24px;
+
         border: 1px solid rgba(56, 189, 248, 0.18);
+
         border-radius: 18px;
+
         background:
           linear-gradient(
             135deg,
@@ -211,77 +300,113 @@
             rgba(99, 102, 241, 0.04)
           ),
           var(--panel);
+
         margin-bottom: 28px;
       }
 
       .scan h3 {
         font-size: 17px;
+
         font-weight: 700;
       }
 
       .scan p {
         color: var(--muted);
+
         font-size: 13px;
+
         margin: 4px 0 16px;
       }
 
       .scan-form {
         display: flex;
+
         gap: 10px;
       }
 
       #urlInput {
         flex: 1;
+
         min-width: 0;
+
         height: 50px;
+
         padding: 0 16px;
+
         border-radius: 11px;
+
         border: 1px solid #26354b;
+
         background: #080e19;
+
         color: #fff;
+
         font-size: 14px;
       }
 
       #urlInput:focus {
         border-color: var(--blue);
+
         outline: 0;
+
         box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
       }
 
       #scanButton {
         min-width: 150px;
+
         height: 50px;
+
         padding: 0 22px;
+
         border: 0;
+
         border-radius: 11px;
+
         color: #fff;
+
         font-weight: 700;
+
         font-size: 14px;
+
         background: linear-gradient(135deg, #0ea5e9, #6366f1);
+
         transition: 0.15s;
+
         display: inline-flex;
+
         gap: 9px;
+
         align-items: center;
+
         justify-content: center;
       }
 
       #scanButton:hover:not(:disabled) {
         transform: translateY(-1px);
+
         box-shadow: 0 10px 24px rgba(14, 165, 233, 0.28);
       }
 
       #scanButton:disabled {
         opacity: 0.65;
+
         cursor: wait;
       }
 
       .spinner {
         width: 14px;
+
         height: 14px;
+
         border: 2px solid rgba(255, 255, 255, 0.35);
+
         border-top-color: #fff;
+
         border-radius: 50%;
+
         animation: spin 0.7s linear infinite;
+
         display: none;
       }
 
@@ -297,220 +422,321 @@
 
       #statusMessage {
         display: none;
+
         margin-top: 12px;
+
         padding: 10px 13px;
+
         border-radius: 9px;
+
         font-size: 13px;
       }
 
       #statusMessage.success {
         display: block;
+
         background: rgba(52, 211, 153, 0.09);
+
         border: 1px solid rgba(52, 211, 153, 0.2);
+
         color: #86efac;
       }
 
       #statusMessage.error {
         display: block;
+
         background: rgba(251, 113, 133, 0.09);
+
         border: 1px solid rgba(251, 113, 133, 0.2);
+
         color: #fda4af;
       }
 
       #statusMessage.info {
         display: block;
+
         background: rgba(56, 189, 248, 0.09);
+
         border: 1px solid rgba(56, 189, 248, 0.2);
+
         color: #7dd3fc;
       }
 
-      /* sections */
+      /* =========================================================
+
+           SECTIONS
+
+        ========================================================= */
 
       .sec {
         display: flex;
+
         justify-content: space-between;
+
         align-items: baseline;
+
         margin: 0 0 12px;
       }
 
       .sec h3 {
         font-size: 14px;
+
         font-weight: 700;
       }
 
       .sec span {
         font-size: 12px;
+
         color: var(--faint);
       }
 
       .grid4 {
         display: grid;
+
         grid-template-columns: repeat(4, minmax(0, 1fr));
+
         gap: 14px;
+
         margin-bottom: 28px;
       }
 
       .grid3 {
         display: grid;
+
         grid-template-columns: repeat(3, minmax(0, 1fr));
+
         gap: 14px;
+
         margin-bottom: 28px;
       }
 
       .card {
         padding: 18px;
+
         border: 1px solid var(--line);
+
         border-radius: 14px;
+
         background: var(--panel);
       }
 
       .card .label {
         font-size: 12px;
+
         color: var(--muted);
+
         display: flex;
+
         justify-content: space-between;
+
         align-items: center;
       }
 
       .card .num {
         font-size: 28px;
+
         font-weight: 800;
+
         letter-spacing: -0.6px;
+
         margin-top: 10px;
       }
 
       .card .note {
         font-size: 11px;
+
         color: var(--faint);
+
         margin-top: 2px;
       }
 
       .ic {
         width: 28px;
+
         height: 28px;
+
         border-radius: 8px;
+
         display: grid;
+
         place-items: center;
+
         font-size: 13px;
+
         font-weight: 700;
       }
 
       .c-blue {
         background: rgba(56, 189, 248, 0.12);
+
         color: var(--blue);
       }
 
       .c-green {
         background: rgba(52, 211, 153, 0.12);
+
         color: var(--green);
       }
 
       .c-red {
         background: rgba(251, 113, 133, 0.12);
+
         color: var(--red);
       }
 
       .c-amber {
         background: rgba(251, 191, 36, 0.12);
+
         color: var(--amber);
       }
 
       .c-violet {
         background: rgba(167, 139, 250, 0.12);
+
         color: var(--violet);
       }
 
+      /* =========================================================
+
+           PANELS
+
+        ========================================================= */
+
       .panel {
         border: 1px solid var(--line);
+
         border-radius: 15px;
+
         background: var(--panel);
+
         overflow: hidden;
       }
 
       .panel-head {
         display: flex;
+
         justify-content: space-between;
+
         align-items: center;
+
         padding: 16px 20px;
+
         border-bottom: 1px solid var(--line);
       }
 
       .panel-head h3 {
         font-size: 14px;
+
         font-weight: 700;
       }
 
       .panel-head span {
         font-size: 12px;
+
         color: var(--faint);
       }
 
       .two {
         display: grid;
+
         grid-template-columns: 0.9fr 1.1fr;
+
         gap: 18px;
+
         margin-bottom: 28px;
       }
 
-      /* score */
+      /* =========================================================
+
+           HEALTH SCORE
+
+        ========================================================= */
 
       .score-body {
         display: flex;
+
         gap: 24px;
+
         align-items: center;
+
         padding: 24px;
       }
 
       .ring {
         --angle: 360deg;
+
         width: 140px;
+
         height: 140px;
+
         flex-shrink: 0;
+
         border-radius: 50%;
+
         display: grid;
+
         place-items: center;
+
         position: relative;
+
         background: conic-gradient(var(--score) var(--angle), #1c2738 0);
-        transition: background 0.6s;
+
+        transition: * * background * * 0.6s;
       }
 
       .ring::before {
         content: "";
+
         position: absolute;
+
         inset: 10px;
+
         border-radius: 50%;
+
         background: var(--panel);
       }
 
       .ring div {
         position: relative;
+
         text-align: center;
       }
 
       .ring strong {
         display: block;
+
         font-size: 34px;
+
         font-weight: 800;
+
         line-height: 1;
       }
 
       .ring span {
         font-size: 11px;
+
         color: var(--muted);
       }
 
       .score-info h4 {
         font-size: 16px;
+
         margin-bottom: 6px;
       }
 
       .score-info p {
         font-size: 13px;
+
         color: var(--muted);
+
         max-width: 34ch;
       }
 
-      /* website */
+      /* =========================================================
+
+           WEBSITE
+
+        ========================================================= */
 
       .web-body {
         padding: 20px;
@@ -518,46 +744,248 @@
 
       .web-url {
         font-size: 14px;
+
         color: #dbeafe;
+
         word-break: break-all;
+
         margin-bottom: 16px;
+
         font-weight: 600;
       }
 
       .meta {
         display: grid;
+
         grid-template-columns: 1fr 1fr;
+
         gap: 10px;
       }
 
       .meta div {
         padding: 12px;
+
         border: 1px solid var(--line);
+
         border-radius: 10px;
+
         background: rgba(255, 255, 255, 0.015);
+
         min-width: 0;
       }
 
       .meta label {
         display: block;
+
         font-size: 11px;
+
         color: var(--faint);
+
         margin-bottom: 3px;
       }
 
       .meta strong {
         font-size: 13px;
+
         word-break: break-word;
       }
 
-      /* issues */
+      /* =========================================================
+
+           PERFORMANCE
+
+        ========================================================= */
+
+      .performance-panel {
+        margin-bottom: 28px;
+      }
+
+      .performance-grid {
+        display: grid;
+
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+
+        gap: 12px;
+
+        padding: 18px 20px 20px;
+      }
+
+      .performance-score-card {
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        justify-content: flex-start;
+      }
+
+      .performance-score-layout {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        margin-top: 8px;
+      }
+
+      .performance-score-ring {
+        --performance-score: 0;
+
+        --performance-score-color: var(--green);
+
+        width: 76px;
+
+        height: 76px;
+
+        flex: 0 0 76px;
+
+        display: grid;
+
+        place-items: center;
+
+        border-radius: 50%;
+
+        background: conic-gradient(
+          var(--performance-score-color) calc(var(--performance-score) * 1%),
+          rgba(148, 163, 184, 0.13) 0
+        );
+
+        position: relative;
+      }
+
+      .performance-score-ring::before {
+        content: "";
+
+        position: absolute;
+
+        inset: 6px;
+
+        border-radius: 50%;
+
+        background: var(--panel);
+      }
+
+      .performance-score-number {
+        position: relative;
+
+        z-index: 1;
+
+        font-size: 21px;
+
+        font-weight: 800;
+
+        letter-spacing: -0.8px;
+      }
+
+      .performance-score-copy {
+        min-width: 0;
+      }
+
+      .performance-score-rating {
+        font-size: 12px;
+
+        font-weight: 800;
+
+        margin-bottom: 4px;
+      }
+
+      .performance-score-description {
+        color: var(--muted);
+
+        font-size: 10px;
+
+        line-height: 1.5;
+      }
+
+      .performance-score-details {
+        color: var(--faint);
+
+        font-size: 10px;
+
+        line-height: 1.5;
+
+        margin-top: 10px;
+      }
+
+      .performance-card {
+        padding: 16px;
+
+        border: 1px solid var(--line);
+
+        border-radius: 12px;
+
+        background: rgba(255, 255, 255, 0.015);
+
+        min-width: 0;
+      }
+
+      .performance-icon {
+        width: 32px;
+
+        height: 32px;
+
+        display: grid;
+
+        place-items: center;
+
+        border-radius: 9px;
+
+        margin-bottom: 12px;
+
+        font-size: 14px;
+
+        font-weight: 700;
+
+        background: rgba(167, 139, 250, 0.12);
+
+        color: var(--violet);
+      }
+
+      .performance-label {
+        color: var(--muted);
+
+        font-size: 11px;
+
+        margin-bottom: 5px;
+      }
+
+      .performance-value {
+        font-size: 20px;
+
+        font-weight: 800;
+
+        letter-spacing: -0.4px;
+
+        word-break: break-word;
+      }
+
+      .performance-note {
+        margin-top: 3px;
+
+        color: var(--faint);
+
+        font-size: 10px;
+      }
+
+      /* =========================================================
+
+           ISSUES
+
+        ========================================================= */
 
       .issue-row {
         display: grid;
+
         grid-template-columns: 130px 1fr 80px;
+
         gap: 16px;
+
         align-items: center;
+
         padding: 14px 20px;
+
         border-bottom: 1px solid rgba(148, 163, 184, 0.07);
       }
 
@@ -567,14 +995,19 @@
 
       .issue-type {
         font-size: 12px;
+
         font-weight: 700;
+
         color: #dbeafe;
+
         word-break: break-word;
       }
 
       .issue-msg {
         font-size: 13px;
+
         color: var(--muted);
+
         word-break: break-word;
       }
 
@@ -584,32 +1017,47 @@
 
       .issue-url {
         margin-top: 5px;
+
         font-size: 11px;
+
         color: var(--blue);
+
         word-break: break-all;
+
         line-height: 1.5;
       }
 
       .issue-meta {
         display: flex;
+
         flex-wrap: wrap;
+
         gap: 8px;
+
         margin-top: 7px;
       }
 
       .issue-meta span {
         padding: 3px 7px;
+
         border-radius: 6px;
+
         background: rgba(255, 255, 255, 0.04);
+
         border: 1px solid var(--line);
+
         color: var(--faint);
+
         font-size: 10px;
       }
 
       .issue-recommendation {
         margin-top: 7px;
+
         font-size: 11px;
+
         color: var(--muted);
+
         line-height: 1.5;
       }
 
@@ -619,46 +1067,67 @@
 
       .sev {
         justify-self: end;
+
         padding: 4px 10px;
+
         border-radius: 999px;
+
         font-size: 11px;
+
         font-weight: 700;
       }
 
       .sev-high {
         background: rgba(251, 113, 133, 0.12);
+
         color: #fda4af;
       }
 
       .sev-medium {
         background: rgba(251, 191, 36, 0.12);
+
         color: #fcd34d;
       }
 
       .sev-low {
         background: rgba(56, 189, 248, 0.12);
+
         color: #7dd3fc;
       }
 
       .empty-state {
         padding: 34px;
+
         text-align: center;
+
         color: var(--muted);
+
         font-size: 13px;
       }
 
       .empty-state b {
         display: grid;
+
         place-items: center;
+
         width: 40px;
+
         height: 40px;
+
         margin: 0 auto 10px;
+
         border-radius: 50%;
+
         background: rgba(52, 211, 153, 0.1);
+
         color: var(--green);
       }
 
-      /* table */
+      /* =========================================================
+
+           TABLE
+
+        ========================================================= */
 
       .table-wrap {
         overflow-x: auto;
@@ -666,28 +1135,43 @@
 
       table {
         width: 100%;
+
         border-collapse: collapse;
+
         min-width: 640px;
       }
 
       th {
         padding: 12px 20px;
+
         text-align: left;
+
         font-size: 12px;
+
         font-weight: 600;
+
         color: var(--faint);
+
         background: rgba(255, 255, 255, 0.015);
+
         border-bottom: 1px solid var(--line);
       }
 
       td {
         padding: 13px 20px;
+
         font-size: 13px;
+
         color: #b4bfcf;
+
         border-bottom: 1px solid rgba(148, 163, 184, 0.07);
+
         max-width: 260px;
+
         overflow: hidden;
+
         text-overflow: ellipsis;
+
         white-space: nowrap;
       }
 
@@ -701,31 +1185,49 @@
 
       .pill {
         display: inline-flex;
+
         gap: 6px;
+
         align-items: center;
+
         font-weight: 700;
       }
 
       .latest-badge {
         display: inline-block;
+
         margin-left: 6px;
+
         padding: 3px 7px;
+
         border-radius: 999px;
+
         font-size: 9px;
+
         font-weight: 700;
+
         letter-spacing: 0.4px;
+
         text-transform: uppercase;
+
         color: #bfdbfe;
+
         background: rgba(59, 130, 246, 0.12);
+
         border: 1px solid rgba(59, 130, 246, 0.2);
+
         vertical-align: middle;
       }
 
       .pill::before {
         content: "";
+
         width: 6px;
+
         height: 6px;
+
         border-radius: 50%;
+
         background: currentColor;
       }
 
@@ -740,17 +1242,29 @@
       .empty,
       .loading-row {
         text-align: center;
+
         color: var(--faint);
+
         padding: 26px;
       }
 
       .footer {
         display: flex;
+
         justify-content: space-between;
+
         margin-top: 26px;
+
         font-size: 12px;
+
         color: var(--faint);
       }
+
+      /* =========================================================
+
+           RESPONSIVE
+
+        ========================================================= */
 
       @media (max-width: 1100px) {
         .grid4 {
@@ -760,16 +1274,22 @@
         .two {
           grid-template-columns: 1fr;
         }
+
+        .performance-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
       }
 
       @media (max-width: 800px) {
         .sidebar {
           width: 68px;
+
           padding: 18px 10px;
         }
 
         .brand {
           justify-content: center;
+
           padding-inline: 0;
         }
 
@@ -786,7 +1306,12 @@
 
         .main {
           margin-left: 68px;
+
           padding: 22px 16px;
+        }
+
+        .performance-grid {
+          grid-template-columns: repeat(2, 1fr);
         }
       }
 
@@ -817,6 +1342,7 @@
 
         .score-body {
           flex-direction: column;
+
           text-align: center;
         }
 
@@ -824,8 +1350,13 @@
           grid-template-columns: 1fr;
         }
 
+        .performance-grid {
+          grid-template-columns: 1fr;
+        }
+
         .issue-row {
           grid-template-columns: 1fr;
+
           gap: 6px;
         }
 
@@ -835,6 +1366,7 @@
 
         .footer {
           flex-direction: column;
+
           gap: 4px;
         }
       }
@@ -842,42 +1374,149 @@
       @media (prefers-reduced-motion: reduce) {
         * {
           animation: none !important;
+
           transition: none !important;
+
           scroll-behavior: auto !important;
+        }
+      }
+
+      /* Dashboard layout improvements */
+
+      .page-head h2 {
+        font-size: 30px;
+      }
+
+      .page-head p {
+        font-size: 14px;
+      }
+
+      .sec h3,
+      .panel-head h3 {
+        font-size: 15px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .card .label {
+        font-size: 13px;
+      }
+
+      .card .num {
+        font-size: 30px;
+      }
+
+      .card .note {
+        font-size: 12px;
+      }
+
+      .performance-grid {
+        gap: 14px;
+
+        padding: 20px;
+      }
+
+      .performance-card {
+        padding: 18px;
+      }
+
+      .performance-label {
+        font-size: 12px;
+      }
+
+      .performance-value {
+        font-size: 22px;
+      }
+
+      .table-wrap {
+        width: 100%;
+
+        overflow-x: auto;
+      }
+
+      @media (max-width: 1100px) {
+        .main {
+          padding: 24px;
+        }
+
+        .performance-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 800px) {
+        .main {
+          margin-left: 68px;
+
+          width: calc(100% - 68px);
+
+          padding: 22px 16px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .page-head h2 {
+          font-size: 23px;
+        }
+
+        .scan {
+          padding: 18px;
+        }
+
+        .grid4 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid3,
+        .performance-grid {
+          grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
 
   <body>
+    <!-- =========================================================
+
+         SIDEBAR
+
+    ========================================================== -->
+
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-icon">◈</div>
 
         <div>
           <h1>QA Sentinel</h1>
-          <span>Website intelligence</span>
+
+          <span> Website intelligence </span>
         </div>
       </div>
 
       <nav class="nav">
         <a href="#dashboard" class="active">
           <i>◉</i>
+
           <span>Dashboard</span>
         </a>
 
         <a href="#scanner">
           <i>⌕</i>
+
           <span>Website scanner</span>
         </a>
 
         <a href="#issues">
           <i>⚠</i>
+
           <span>Issues</span>
         </a>
 
         <a href="#history">
           <i>◷</i>
+
           <span>Scan history</span>
         </a>
       </nav>
@@ -885,19 +1524,31 @@
       <div class="api">
         <div class="dot" id="apiDot"></div>
 
-        <span id="apiText">Checking API…</span>
+        <span id="apiText"> Checking API… </span>
       </div>
     </aside>
+
+    <!-- =========================================================
+
+         MAIN
+
+    ========================================================== -->
 
     <main class="main" id="dashboard">
       <div class="page-head">
         <h2>Quality dashboard</h2>
 
         <p>
-          Scan a page and see broken links, missing images and script errors in
-          one place.
+          Scan a page and see broken links, missing images, script errors and
+          performance in one place.
         </p>
       </div>
+
+      <!-- =====================================================
+
+             SCANNER
+
+        ====================================================== -->
 
       <section class="scan" id="scanner">
         <h3>Scan a website</h3>
@@ -916,23 +1567,30 @@
           <button type="button" id="scanButton">
             <span class="spinner"></span>
 
-            <span id="scanLabel">Run QA scan</span>
+            <span id="scanLabel"> Run QA scan </span>
           </button>
         </div>
 
         <div id="statusMessage" role="status"></div>
       </section>
 
+      <!-- =====================================================
+
+             LINKS AND IMAGES
+
+        ====================================================== -->
+
       <div class="sec">
         <h3>Links and images</h3>
 
-        <span>Latest scan</span>
+        <span> Latest scan </span>
       </div>
 
       <section class="grid4">
         <div class="card">
           <div class="label">
             Total links
+
             <div class="ic c-blue">↗</div>
           </div>
 
@@ -944,6 +1602,7 @@
         <div class="card">
           <div class="label">
             Working links
+
             <div class="ic c-green">✓</div>
           </div>
 
@@ -955,6 +1614,7 @@
         <div class="card">
           <div class="label">
             Broken links
+
             <div class="ic c-red">!</div>
           </div>
 
@@ -966,6 +1626,7 @@
         <div class="card">
           <div class="label">
             Skipped links
+
             <div class="ic c-amber">–</div>
           </div>
 
@@ -977,6 +1638,7 @@
         <div class="card">
           <div class="label">
             Total images
+
             <div class="ic c-violet">◇</div>
           </div>
 
@@ -988,6 +1650,7 @@
         <div class="card">
           <div class="label">
             Working images
+
             <div class="ic c-green">✓</div>
           </div>
 
@@ -999,6 +1662,7 @@
         <div class="card">
           <div class="label">
             Broken images
+
             <div class="ic c-red">!</div>
           </div>
 
@@ -1010,6 +1674,7 @@
         <div class="card">
           <div class="label">
             JavaScript errors
+
             <div class="ic c-violet">JS</div>
           </div>
 
@@ -1019,20 +1684,26 @@
         </div>
       </section>
 
+      <!-- =====================================================
+
+             HEALTH + WEBSITE
+
+        ====================================================== -->
+
       <section class="two">
         <div class="panel">
           <div class="panel-head">
             <h3>Health score</h3>
 
-            <span>Current scan</span>
+            <span> Current scan </span>
           </div>
 
           <div class="score-body">
             <div class="ring" id="scoreRing">
               <div>
-                <strong id="qaScore">100</strong>
+                <strong id="qaScore"> 100 </strong>
 
-                <span>out of 100</span>
+                <span> out of 100 </span>
               </div>
             </div>
 
@@ -1050,7 +1721,7 @@
           <div class="panel-head">
             <h3>Website details</h3>
 
-            <span>Scan information</span>
+            <span> Scan information </span>
           </div>
 
           <div class="web-body">
@@ -1058,43 +1729,154 @@
 
             <div class="meta">
               <div>
-                <label>HTTP status</label>
+                <label> HTTP status </label>
 
-                <strong id="statusCode">—</strong>
+                <strong id="statusCode"> — </strong>
               </div>
 
               <div>
-                <label>Scan ID</label>
+                <label> Scan ID </label>
 
-                <strong id="scanId">—</strong>
+                <strong id="scanId"> — </strong>
               </div>
 
               <div>
-                <label>Page title</label>
+                <label> Page title </label>
 
-                <strong id="pageTitle">—</strong>
+                <strong id="pageTitle"> — </strong>
               </div>
 
               <div>
-                <label>Total issues</label>
+                <label> Total issues </label>
 
-                <strong id="totalIssues">0</strong>
+                <strong id="totalIssues"> 0 </strong>
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      <!-- =====================================================
+
+             PERFORMANCE
+
+        ====================================================== -->
+
+      <section class="panel performance-panel" id="performance">
+        <div class="panel-head">
+          <h3>⚡ Page performance</h3>
+
+          <span> Latest scan </span>
+        </div>
+
+        <div class="performance-grid">
+          <div class="performance-card performance-score-card">
+            <div class="performance-label">Performance score</div>
+
+            <div class="performance-score-layout">
+              <div
+                class="performance-score-ring"
+                id="performanceScoreRing"
+                style="--performance-score: 0"
+                role="img"
+                aria-label="Performance score not available"
+              >
+                <span class="performance-score-number" id="performanceScore"
+                  >—</span
+                >
+              </div>
+
+              <div class="performance-score-copy">
+                <div
+                  class="performance-score-rating"
+                  id="performanceScoreTitle"
+                >
+                  Awaiting scan
+                </div>
+
+                <div
+                  class="performance-score-description"
+                  id="performanceScoreDescription"
+                >
+                  Run a scan to calculate your score.
+                </div>
+              </div>
+            </div>
+
+            <div class="performance-score-details" id="performanceScoreDetails">
+              Based on load time and resource count.
+            </div>
+          </div>
+
+          <div class="performance-card">
+            <div class="performance-icon">◷</div>
+
+            <div class="performance-label">Load time</div>
+
+            <div class="performance-value" id="performanceLoadTime">—</div>
+
+            <div class="performance-note">Page navigation</div>
+          </div>
+
+          <div class="performance-card">
+            <div class="performance-icon">◈</div>
+
+            <div class="performance-label">Total resources</div>
+
+            <div class="performance-value" id="performanceResources">0</div>
+
+            <div class="performance-note">Loaded resources</div>
+          </div>
+
+          <div class="performance-card">
+            <div class="performance-icon">JS</div>
+
+            <div class="performance-label">JavaScript</div>
+
+            <div class="performance-value" id="performanceJavascript">0</div>
+
+            <div class="performance-note">Script resources</div>
+          </div>
+
+          <div class="performance-card">
+            <div class="performance-icon">CSS</div>
+
+            <div class="performance-label">CSS</div>
+
+            <div class="performance-value" id="performanceCss">0</div>
+
+            <div class="performance-note">Stylesheet resources</div>
+          </div>
+
+          <div class="performance-card">
+            <div class="performance-icon">◇</div>
+
+            <div class="performance-label">Images</div>
+
+            <div class="performance-value" id="performanceImages">0</div>
+
+            <div class="performance-note">Image resources</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+
+             ISSUE SEVERITY
+
+        ====================================================== -->
+
       <div class="sec">
         <h3>Issue severity</h3>
 
-        <span>Latest scan</span>
+        <span> Latest scan </span>
       </div>
 
       <section class="grid3">
         <div class="card">
           <div class="label">
             High
+
             <div class="ic c-red">!</div>
           </div>
 
@@ -1106,6 +1888,7 @@
         <div class="card">
           <div class="label">
             Medium
+
             <div class="ic c-amber">!</div>
           </div>
 
@@ -1117,6 +1900,7 @@
         <div class="card">
           <div class="label">
             Low
+
             <div class="ic c-blue">!</div>
           </div>
 
@@ -1126,27 +1910,39 @@
         </div>
       </section>
 
+      <!-- =====================================================
+
+             DETECTED ISSUES
+
+        ====================================================== -->
+
       <section class="panel" id="issues" style="margin-bottom: 28px">
         <div class="panel-head">
           <h3>Detected issues</h3>
 
-          <span id="issueCount">0 issues</span>
+          <span id="issueCount"> 0 issues </span>
         </div>
 
         <div id="issueList">
           <div class="empty-state">
-            <b>⌕</b>
+            <b> ⌕ </b>
 
             Run a scan to see issues.
           </div>
         </div>
       </section>
 
+      <!-- =====================================================
+
+             SCAN HISTORY
+
+        ====================================================== -->
+
       <section class="panel" id="history">
         <div class="panel-head">
           <h3>Recent scans</h3>
 
-          <span id="historySummary">Scan history</span>
+          <span id="historySummary"> Scan history </span>
         </div>
 
         <div class="table-wrap">
@@ -1183,8 +1979,14 @@
       </footer>
     </main>
 
+    <!-- =========================================================
+
+         JAVASCRIPT
+
+    ========================================================== -->
+
     <script>
-      const API_URL = "http://127.0.0.1:8000";
+      const API_URL = window.location.origin;
 
       const $ = (id) => document.getElementById(id);
 
@@ -1193,6 +1995,12 @@
       const urlInput = $("urlInput");
 
       const statusMessage = $("statusMessage");
+
+      /* =====================================================
+
+           HELPERS
+
+        ====================================================== */
 
       function setText(id, value) {
         const el = $(id);
@@ -1231,7 +2039,11 @@
         return Number.isNaN(d.getTime()) ? String(value) : d.toLocaleString();
       }
 
-      /* ---------- score ---------- */
+      /* =====================================================
+
+           SCORE
+
+        ====================================================== */
 
       function calculateScore(brokenLinks, brokenImages, jsErrors) {
         const score = 100 - brokenLinks * 10 - brokenImages * 5 - jsErrors * 10;
@@ -1246,9 +2058,11 @@
 
         ring.style.setProperty("--angle", `${score * 3.6}deg`);
 
-        let color = "var(--green)",
-          title,
-          text;
+        let color = "var(--green)";
+
+        let title;
+
+        let text;
 
         if (score >= 90) {
           title = "Excellent health";
@@ -1287,7 +2101,240 @@
         setText("scoreDescription", text);
       }
 
-      /* ---------- issues ---------- */
+      /* =====================================================
+
+           PERFORMANCE
+
+        ====================================================== */
+
+      function calculatePerformanceScore(loadTimeMs, totalResources) {
+        // Load time contributes up to 70 points.
+
+        const loadTimeBands = [
+          [1000, 70],
+
+          [2000, 63],
+
+          [3000, 56],
+
+          [4000, 49],
+
+          [5000, 42],
+
+          [7000, 32],
+
+          [10000, 21],
+
+          [Infinity, 10],
+        ];
+
+        const resourceBands = [
+          [10, 30],
+
+          [20, 27],
+
+          [40, 23],
+
+          [60, 18],
+
+          [100, 12],
+
+          [Infinity, 5],
+        ];
+
+        const loadPoints = loadTimeBands.find(
+          ([limit]) => loadTimeMs <= limit,
+        )[1];
+
+        const resourcePoints = resourceBands.find(
+          ([limit]) => totalResources <= limit,
+        )[1];
+
+        return {
+          score: Math.max(0, Math.min(100, loadPoints + resourcePoints)),
+
+          loadPoints,
+
+          resourcePoints,
+        };
+      }
+
+      function displayPerformanceScore(performance) {
+        const ring = document.getElementById("performanceScoreRing");
+
+        if (!ring) {
+          return;
+        }
+
+        const showUnavailable = (title, description, details) => {
+          ring.style.setProperty("--performance-score", 0);
+
+          ring.style.setProperty("--performance-score-color", "var(--amber)");
+
+          ring.setAttribute("aria-label", "Performance score unavailable");
+
+          setText("performanceScore", "—");
+
+          setText("performanceScoreTitle", title);
+
+          setText("performanceScoreDescription", description);
+
+          setText("performanceScoreDetails", details);
+        };
+
+        if (!performance) {
+          showUnavailable(
+            "Awaiting scan",
+
+            "Run a scan to calculate your score.",
+
+            "Based on load time and resource count.",
+          );
+
+          return;
+        }
+
+        const loadTimeMs = Number(performance.load_time_ms);
+
+        const totalResources = Number(performance.total_resources);
+
+        // Never score an incomplete navigation as a completed page load.
+
+        if (
+          performance.measurement_complete === false ||
+          performance.navigation_timed_out === true
+        ) {
+          showUnavailable(
+            "Measurement incomplete",
+
+            "Navigation timed out. A reliable performance score cannot be calculated for this scan.",
+
+            performance.measurement_note ||
+              "Run the scan again to obtain a completed measurement.",
+          );
+
+          return;
+        }
+
+        if (
+          !Number.isFinite(loadTimeMs) ||
+          loadTimeMs <= 0 ||
+          !Number.isFinite(totalResources) ||
+          totalResources < 0
+        ) {
+          showUnavailable(
+            "Score unavailable",
+
+            "The scan did not return enough performance data.",
+
+            "Try scanning the website again.",
+          );
+
+          return;
+        }
+
+        const result = calculatePerformanceScore(loadTimeMs, totalResources);
+
+        let title;
+
+        let description;
+
+        let color;
+
+        if (result.score >= 90) {
+          title = "Excellent";
+
+          description = "Fast load and lean resources.";
+
+          color = "var(--green)";
+        } else if (result.score >= 75) {
+          title = "Good";
+
+          description = "Performance looks healthy.";
+
+          color = "var(--blue)";
+        } else if (result.score >= 50) {
+          title = "Needs work";
+
+          description = "There is room to optimize.";
+
+          color = "var(--amber)";
+        } else {
+          title = "Poor";
+
+          description = "Review load time and resources.";
+
+          color = "var(--red)";
+        }
+
+        ring.style.setProperty("--performance-score", result.score);
+
+        ring.style.setProperty("--performance-score-color", color);
+
+        ring.setAttribute(
+          "aria-label",
+
+          `Performance score ${result.score} out of 100`,
+        );
+
+        setText("performanceScore", result.score);
+
+        setText("performanceScoreTitle", title);
+
+        setText("performanceScoreDescription", description);
+
+        setText(
+          "performanceScoreDetails",
+
+          `Load time: ${result.loadPoints}/70 · Resources: ${result.resourcePoints}/30`,
+        );
+      }
+
+      function displayPerformance(performance) {
+        displayPerformanceScore(performance);
+
+        if (!performance) {
+          setText("performanceLoadTime", "—");
+
+          setText("performanceResources", 0);
+
+          setText("performanceJavascript", 0);
+
+          setText("performanceCss", 0);
+
+          setText("performanceImages", 0);
+
+          return;
+        }
+
+        const loadTime = Number(performance.load_time_ms ?? 0);
+
+        let loadTimeText = "—";
+
+        if (loadTime > 0) {
+          if (loadTime >= 1000) {
+            loadTimeText = `${(loadTime / 1000).toFixed(2)} s`;
+          } else {
+            loadTimeText = `${loadTime} ms`;
+          }
+        }
+
+        setText("performanceLoadTime", loadTimeText);
+
+        setText("performanceResources", performance.total_resources ?? 0);
+
+        setText("performanceJavascript", performance.javascript ?? 0);
+
+        setText("performanceCss", performance.css ?? 0);
+
+        setText("performanceImages", performance.images ?? 0);
+      }
+
+      /* =====================================================
+
+           ISSUES
+
+        ====================================================== */
 
       function displayIssues(issues) {
         const container = $("issueList");
@@ -1304,16 +2351,23 @@
           countLabel.textContent = "0 issues";
 
           container.innerHTML = `
-            <div class="empty-state">
-              <b>✓</b>
-              No issues found. This page looks healthy.
-            </div>
-          `;
+
+                    <div class="empty-state">
+
+                        <b>✓</b>
+
+                        No issues found. This page looks healthy.
+
+                    </div>
+
+                `;
 
           return;
         }
 
-        countLabel.textContent = `${issues.length} issue${issues.length === 1 ? "" : "s"}`;
+        countLabel.textContent = `${issues.length} issue${
+          issues.length === 1 ? "" : "s"
+        }`;
 
         issues.forEach((issue) => {
           const severity = String(issue.severity ?? "MEDIUM").toLowerCase();
@@ -1350,146 +2404,157 @@
 
           row.innerHTML = `
 
-            <div class="issue-type">
+                        <div class="issue-type">
 
-              ${escapeHtml(issueType)}
+                            ${escapeHtml(issueType)}
 
-            </div>
+                        </div>
 
+                        <div class="issue-details">
 
-            <div class="issue-details">
+                            <div class="issue-msg">
 
-              <div class="issue-msg">
+                                ${escapeHtml(message)}
 
-                ${escapeHtml(message)}
+                            </div>
 
-              </div>
+                            ${
+                              issueUrl
+                                ? `
 
+                                        <div class="issue-url">
 
-              ${
-                issueUrl
-                  ? `
-                    <div class="issue-url">
+                                            ${escapeHtml(issueUrl)}
 
-                      ${escapeHtml(issueUrl)}
+                                        </div>
 
-                    </div>
-                  `
-                  : ""
-              }
+                                      `
+                                : ""
+                            }
 
+                            <div class="issue-meta">
 
-              <div class="issue-meta">
+                                ${
+                                  statusCode !== null
+                                    ? `
 
-                ${
-                  statusCode !== null
-                    ? `
-                      <span>
-                        HTTP ${escapeHtml(statusCode)}
-                      </span>
-                    `
-                    : ""
-                }
+                                            <span>
 
+                                                HTTP ${escapeHtml(statusCode)}
 
-                <span>
-                  Type: ${escapeHtml(issueType)}
-                </span>
+                                            </span>
 
-              </div>
+                                          `
+                                    : ""
+                                }
 
+                                <span>
 
-              <div class="issue-recommendation">
+                                    Type:
 
-                <strong>
-                  Recommendation:
-                </strong>
+                                    ${escapeHtml(issueType)}
 
-                ${escapeHtml(recommendation)}
+                                </span>
 
-              </div>
+                            </div>
 
-            </div>
+                            <div class="issue-recommendation">
 
+                                <strong>
 
-            <div class="sev sev-${cls}">
+                                    Recommendation:
 
-              ${escapeHtml(issue.severity ?? "MEDIUM")}
+                                </strong>
 
-            </div>
+                                ${escapeHtml(recommendation)}
 
-          `;
+                            </div>
+
+                        </div>
+
+                        <div class="sev sev-${cls}">
+
+                            ${escapeHtml(issue.severity ?? "MEDIUM")}
+
+                        </div>
+
+                    `;
 
           container.appendChild(row);
         });
       }
 
-      /* ---------- scan result ---------- */
+      /* =====================================================
+
+           DISPLAY SCAN RESULT
+
+        ====================================================== */
 
       function displayScanResult(data) {
-        if (!data || !data.report) {
+        const report = data?.report || data?.data?.report || data;
+        if (!report || typeof report !== "object") {
           throw new Error("Invalid response received from API.");
         }
 
-        const report = data.report;
-
         const scan = report.scan || {};
-
         const links = report.links || {};
-
         const images = report.images || {};
-
         const js = report.javascript || {};
-
-        const issues = report.issues || {};
+        const performance = report.performance || {};
+        const health = report.health || {};
+        const issues = Array.isArray(report.issues) ? report.issues : [];
 
         const countSeverity = (level) =>
           issues.filter(
-            (i) => String(i.severity ?? "MEDIUM").toUpperCase() === level,
+            (issue) =>
+              String(issue.severity ?? "MEDIUM").toUpperCase() === level,
           ).length;
 
         setText("highIssues", countSeverity("HIGH"));
-
         setText("mediumIssues", countSeverity("MEDIUM"));
-
         setText("lowIssues", countSeverity("LOW"));
 
-        const jsErrorCount = js.console_errors ?? 0;
-
         setText("totalLinks", links.total ?? 0);
-
         setText("workingLinks", links.working ?? 0);
-
         setText("brokenLinks", links.broken ?? 0);
-
         setText("skippedLinks", links.skipped ?? 0);
 
         setText("totalImages", images.total ?? 0);
-
         setText("workingImages", images.working ?? 0);
-
         setText("brokenImages", images.broken ?? 0);
-
-        setText("jsErrors", jsErrorCount);
-
-        setText("totalIssues", issues.length);
-
-        setText("websiteUrl", scan.url ?? data.url ?? "-");
-
-        setText("statusCode", scan.status_code ?? "-");
-
-        setText("pageTitle", scan.page_title ?? "-");
-
-        setText("scanId", scan.scan_id ?? "-");
-
-        updateScore(
-          calculateScore(links.broken ?? 0, images.broken ?? 0, jsErrorCount),
+        setText(
+          "jsErrors",
+          Number(js.console_errors ?? 0) + Number(js.page_errors ?? 0),
         );
 
+        setText("totalIssues", issues.length);
+        setText("websiteUrl", scan.url ?? report.url ?? data?.url ?? "-");
+        setText("statusCode", scan.status_code ?? report.status_code ?? "-");
+        setText("pageTitle", scan.page_title ?? report.page_title ?? "-");
+        setText(
+          "scanId",
+          scan.scan_id ?? report.scan_id ?? data?.scan_id ?? "-",
+        );
+
+        const fallbackScore = calculateScore(
+          Number(links.broken ?? 0),
+          Number(images.broken ?? 0),
+          Number(js.console_errors ?? 0) + Number(js.page_errors ?? 0),
+        );
+        const score = Number.isFinite(Number(health.score))
+          ? Math.max(0, Math.min(100, Number(health.score)))
+          : fallbackScore;
+        updateScore(score);
+
+        displayPerformance(performance);
         displayIssues(issues);
       }
 
-      /* ---------- scan website ---------- */
+      /* =====================================================
+
+           SCAN WEBSITE
+
+        ====================================================== */
 
       async function scanWebsite() {
         const url = urlInput.value.trim();
@@ -1514,6 +2579,7 @@
 
         showStatus(
           "Running automated QA checks. This can take a few seconds.",
+
           "info",
         );
 
@@ -1567,7 +2633,11 @@
         }
       }
 
-      /* ---------- API calls ---------- */
+      /* =====================================================
+
+           SCAN HISTORY
+
+        ====================================================== */
 
       async function loadScanHistory() {
         const tbody = $("historyTableBody");
@@ -1590,21 +2660,25 @@
           if (!scans.length) {
             tbody.innerHTML = `
 
-              <tr>
+                        <tr>
 
-                <td
-                  colspan="6"
-                  class="empty"
-                >
+                            <td
 
-                  No scans yet.
-                  Run your first scan above.
+                                colspan="6"
 
-                </td>
+                                class="empty"
 
-              </tr>
+                            >
 
-            `;
+                                No scans yet.
+
+                                Run your first scan above.
+
+                            </td>
+
+                        </tr>
+
+                    `;
 
             return;
           }
@@ -1617,68 +2691,79 @@
             const healthy = status >= 200 && status < 400;
 
             const latestBadge =
-              index === 0 ? `<span class="latest-badge">Latest</span>` : "";
+              index === 0
+                ? `
+
+                                    <span class="latest-badge">
+
+                                        Latest
+
+                                    </span>
+
+                                  `
+                : "";
 
             const row = document.createElement("tr");
 
             row.innerHTML = `
 
-                <td>
+                            <td>
 
-                  #${escapeHtml(scan.id)}
+                                #${escapeHtml(scan.id)}
 
-                  ${latestBadge}
+                                ${latestBadge}
 
-                </td>
+                            </td>
 
+                            <td
 
-                <td
-                  title="${escapeHtml(scan.website_url)}"
-                >
+                                title="${escapeHtml(scan.website_url)}"
 
-                  ${escapeHtml(scan.website_url)}
+                            >
 
-                </td>
+                                ${escapeHtml(scan.website_url)}
 
+                            </td>
 
-                <td>
+                            <td>
 
-                  <span
-                    class="pill ${healthy ? "ok" : "bad"}"
-                  >
+                                <span
 
-                    ${
-                      healthy
-                        ? "Healthy"
-                        : escapeHtml(scan.status_code ?? "Error")
-                    }
+                                    class="pill ${healthy ? "ok" : "bad"}"
 
-                  </span>
+                                >
 
-                </td>
+                                    ${
+                                      healthy
+                                        ? "Healthy"
+                                        : escapeHtml(
+                                            scan.status_code ?? "Error",
+                                          )
+                                    }
 
+                                </span>
 
-                <td>
+                            </td>
 
-                  ${Number(scan.issue_count ?? 0)}
+                            <td>
 
-                </td>
+                                ${Number(scan.issue_count ?? 0)}
 
+                            </td>
 
-                <td>
+                            <td>
 
-                  ${escapeHtml(scan.page_title || "-")}
+                                ${escapeHtml(scan.page_title || "-")}
 
-                </td>
+                            </td>
 
+                            <td>
 
-                <td>
+                                ${formatDate(scan.scan_time)}
 
-                  ${formatDate(scan.scan_time)}
+                            </td>
 
-                </td>
-
-              `;
+                        `;
 
             tbody.appendChild(row);
           });
@@ -1689,23 +2774,33 @@
 
           tbody.innerHTML = `
 
-            <tr>
+                    <tr>
 
-              <td
-                colspan="6"
-                class="empty"
-              >
+                        <td
 
-                Failed to load scan history.
-                Is the backend running?
+                            colspan="6"
 
-              </td>
+                            class="empty"
 
-            </tr>
+                        >
 
-          `;
+                            Failed to load scan history.
+
+                            Is the backend running?
+
+                        </td>
+
+                    </tr>
+
+                `;
         }
       }
+
+      /* =====================================================
+
+           API STATUS
+
+        ====================================================== */
 
       function setApiState(online) {
         const dot = $("apiDot");
@@ -1721,7 +2816,11 @@
         }
       }
 
-      /* ---------- events ---------- */
+      /* =====================================================
+
+           EVENTS
+
+        ====================================================== */
 
       scanButton.addEventListener("click", (e) => {
         e.preventDefault();
@@ -1740,12 +2839,20 @@
       document.querySelectorAll(".nav a").forEach((link) => {
         link.addEventListener("click", () => {
           document
+
             .querySelectorAll(".nav a")
+
             .forEach((a) => a.classList.remove("active"));
 
           link.classList.add("active");
         });
       });
+
+      /* =====================================================
+
+           INITIAL LOAD
+
+        ====================================================== */
 
       document.addEventListener("DOMContentLoaded", () => {
         updateScore(100);
@@ -1754,8 +2861,11 @@
 
         setText(
           "scoreDescription",
+
           "Your score appears here after the first scan.",
         );
+
+        displayPerformance(null);
 
         loadScanHistory();
       });

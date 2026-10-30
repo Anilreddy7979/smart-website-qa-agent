@@ -1,0 +1,3 @@
+ALTER TABLE scans ADD COLUMN IF NOT EXISTS report JSONB;
+ALTER TABLE scans ADD COLUMN IF NOT EXISTS health_score INTEGER;
+CREATE INDEX IF NOT EXISTS idx_issues_scan_id ON issues(scan_id);
